@@ -1,4 +1,5 @@
 export interface INavigation {
     name: string,
-    url: string
+    href: string,
+    svgUrl?: string
 }
