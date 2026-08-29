@@ -1,3 +1,29 @@
 /* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+*, *::after, *::before {
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+}
+
+@layer components {
+    
+}
+
+@theme {
+    /* Fonts */
+    --font-quicksand: "Quicksand", sans-serif; 
+    --font-dm: "DMSans", sans-serif;
+    --font-primary: "DMSans", sans-serif;
+    /* Colors */
+    --color-grey: #222222;
+    --color-orange: #FF6D1F;
+    --color-beige: #F5E7C6;
+    --color-light-beige: #FAF3E1;
+    --color-white: #fff;
+    /* Animations */
+
+}
