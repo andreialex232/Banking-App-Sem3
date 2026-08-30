@@ -8,14 +8,14 @@ import { Button } from "@/app/shared/ui/button/button";
   template: `
 
 
-<div class="font-dm text-grey max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+<div class="font-dm text-grey md:grid-flow-col grid grid-cols-12 md:gap-12 gap-12 lg:gap-8 2xl:gap-12 items-center">
     <!-- Left Side Text -->
-    <div class="flex flex-col gap-6 items-start">
-        <h2 class="text-orange text-4xl font-bold">Choose the Card Built for Your Lifestyle</h2>
+    <div class="w-full col-start-2 col-end-12 md:col-start-3 md:col-end-12 lg:col-start-2 lg:col-end-7 flex flex-col gap-6 items-start">
+        <h2 class="text-3xl text-black sm:text-5xl font-bold">Choose the Card Built for Your Lifestyle</h2>
         
-        <p class="text-lg">Pick the perfect card to gear up for your daily spending. Whether you are traveling, shopping online, or saving for the future, match your card to your goals.</p>
+        <p class="text-base lg:text-lg text-gray-600">Pick the perfect card to gear up for your daily spending. Whether you are traveling, shopping online, or saving for the future, match your card to your goals.</p>
 
-        <ul class="flex flex-col gap-2 text-base font-medium">
+        <ul class="flex flex-col gap-2 md:text-md xl:text-base font-medium">
             <li class="flex items-center gap-2">
                 <div class="flex h-6 w-6 items-center justify-center rounded-full bg-orange">
                     <svg class="h-4 w-4 stroke-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
@@ -51,11 +51,15 @@ import { Button } from "@/app/shared/ui/button/button";
     <!-- <div class="w-full">
         <img src="assets/images/card_transparent.webp" alt="Cards Showcase" class="w-full h-auto object-contain">
     </div> -->
-    <div class="flex justify-center place-self-start w-full">
-        <div class="group card-stack relative h-[220px] w-[320px]" [class.is-visible]="isVisible()">
-            <img src="assets/svgs/card_black.svg" aria-hidden="true" alt="" class="card absolute left-0 top-0 z-30 h-auto w-full origin-bottom-left transition-all duration-600 ease-[cubic-bezier(0.34,1.56,0.64,1)]"/>
-            <img src="assets/svgs/card_orange.svg" aria-hidden="true" alt="" class="card absolute left-0 top-0 z-20 h-auto w-full origin-bottom-left opacity-0 transition-all duration-600 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-[.is-visible]:translate-x-[40px] group-[.is-visible]:rotate-[15deg] group-[.is-visible]:opacity-100"/>
-            <img src="assets/svgs/card_blue.svg" aria-hidden="true" alt="" class="card absolute left-0 top-0 z-10 h-auto w-full origin-bottom-left opacity-0 transition-all duration-600 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-[.is-visible]:translate-x-[80px] group-[.is-visible]:rotate-[30deg] group-[.is-visible]:opacity-100"/>
+    <div class="col-start-2 col-end-12 md:col-start-3 md:col-end-11 lg:col-start-8 lg:col-end-12 flex justify-center lg:place-self-start">
+        <div class="group card-stack relative hidden sm:block sm:h-[170px] sm:w-[260px] md:h-[170px] md:w-[260px] xl:h-[220px] xl:w-[320px]" [class.is-visible]="isVisible()">
+            <img src="assets/svgs/card_black.svg" aria-hidden="true" alt="" class="hidden lg:block card absolute left-0 top-0 z-30 h-auto w-full origin-bottom-left transition-all duration-600 ease-[cubic-bezier(0.34,1.56,0.64,1)]"/>
+            <img src="assets/svgs/card_orange.svg" aria-hidden="true" alt="" class="hidden lg:block card absolute left-0 top-0 z-20 h-auto w-full origin-bottom-left opacity-0 transition-all duration-600 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-[.is-visible]:translate-x-[40px] group-[.is-visible]:rotate-[15deg] group-[.is-visible]:opacity-100"/>
+            <img src="assets/svgs/card_blue.svg" aria-hidden="true" alt="" class="hidden lg:block card absolute left-0 top-0 z-10 h-auto w-full origin-bottom-left opacity-0 transition-all duration-600 ease-[cubic-bezier(0.34,1.56,0.64,1)] lg:group-[.is-visible]:translate-x-[50px] xl:group-[.is-visible]:translate-x-[80px] group-[.is-visible]:rotate-[30deg] group-[.is-visible]:opacity-100"/>
+            <!-- Mobile Images Below -->
+            <img src="assets/svgs/card_black.svg" aria-hidden="true" alt="" class="lg:hidden card absolute left-0 top-0 z-30 h-auto w-full origin-center rotate-[90deg] transition-all duration-600 ease-[cubic-bezier(0.34,1.56,0.64,1)]"/>
+            <img src="assets/svgs/card_orange.svg" aria-hidden="true" alt="" class="lg:hidden card absolute left-0 top-0 z-20 h-auto w-full origin-center rotate-[90deg] opacity-0 transition-all duration-600 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-[.is-visible]:-translate-x-[140px] group-[.is-visible]:rotate-[75deg] group-[.is-visible]:opacity-100"/>
+            <img src="assets/svgs/card_blue.svg" aria-hidden="true" alt="" class="lg:hidden card absolute left-0 top-0 z-10 h-auto w-full origin-center rotate-[90deg] opacity-0 transition-all duration-600 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-[.is-visible]:translate-x-[140px] group-[.is-visible]:rotate-[105deg] group-[.is-visible]:opacity-100"/>
         </div>
     </div>
     
