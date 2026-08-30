@@ -15,6 +15,15 @@ interface IPlan {
   selector: 'app-plans',
   imports: [RouterLink],
   template:`
+
+    <div class="col-start-2 col-end-12 text-center mb-10">
+        <h2 class="font-dm text-4xl font-bold text-black sm:text-5xl">
+        Find your ideal plan.
+        </h2>
+        <p class="font-quicksand mt-4 text-base text-gray-600 max-w-2xl mx-auto">
+        Choose from four unique plans. Only pay for what you need. No hidden fees – just fair, transparent prices.
+        </p>
+    </div>
     <section class="grid grid-cols-12 gap-4 py-12">
       <div class="col-start-2 col-end-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         @for (plan of plans; track plan.name) {
