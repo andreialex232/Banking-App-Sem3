@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FadeInOnScroll } from '@shared/directives/fade-in-on-scroll';
 
 interface IPlan {
   name: string;
@@ -14,17 +15,28 @@ interface IPlan {
 @Component({
   selector: 'app-plans',
   imports: [RouterLink],
+  hostDirectives: [
+    {
+        directive: FadeInOnScroll,
+        inputs: ['thresholdInput: threshold']
+    }
+  ],
+  host: {
+    '[class.opacity-0]': '!fadeIn.isVisible()',
+    '[class.animate-fade-in]': 'fadeIn.isVisible()'
+  },
   template:`
-
-    <div class="col-start-2 col-end-12 text-center mb-10">
-        <h2 class="font-dm text-4xl font-bold text-black sm:text-5xl">
-        Find your ideal plan.
-        </h2>
-        <p class="font-quicksand mt-4 text-base text-gray-600 max-w-2xl mx-auto">
-        Choose from four unique plans. Only pay for what you need. No hidden fees – just fair, transparent prices.
-        </p>
+    <div class="font-dm grid grid-cols-12 text-center mb-10">
+        <div class="col-start-2 col-end-12">
+            <h2 class="text-3xl text-black sm:text-5xl font-bold capitalize">
+            Find <span class="text-orange">your</span> ideal plan
+            </h2>
+            <p class="mt-4 text-base text-black max-w-2xl mx-auto text-base lg:text-lg font-medium">
+            Choose from four unique plans. Only pay for what you need. No hidden fees – just fair, transparent prices.
+            </p>
+        </div>
     </div>
-    <section class="grid grid-cols-12 gap-4 py-12">
+    <section class="grid grid-cols-12 gap-4 sm:py-12">
       <div class="col-start-2 col-end-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         @for (plan of plans; track plan.name) {
           <div
@@ -41,7 +53,7 @@ interface IPlan {
                 <span class="text-3xl font-bold">{{ plan.price }}</span>
                 <span class="text-sm">DKK /month</span>
               </div>
-              <p class="font-quicksand min-h-12 text-sm">
+              <p class="font-dm min-h-12 text-sm">
                 {{ plan.description }}
               </p>
 
@@ -52,7 +64,7 @@ interface IPlan {
                         ? 'bg-black text-white'
                         : 'bg-orange text-white'
                     "
-                    class="cursor-pointer mt-6 block w-full rounded-full py-3 text-center font-dm font-semibold transition hover:opacity-90"
+                    class="cursor-pointer my-2 block w-full rounded-lg py-3 text-center font-dm font-semibold transition hover:opacity-90"
                     >
                     {{ plan.buttonText }}
                 </a>
@@ -67,7 +79,7 @@ interface IPlan {
                 @for (feature of plan.features; track feature) {
                   <li class="flex items-start gap-2">
                     <div
-                      class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-black text-white"
+                      class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-orange text-white"
                     >
                       <svg
                         class="h-2.5 w-2.5 stroke-white"
@@ -98,6 +110,8 @@ interface IPlan {
   styles: ``,
 })
 export class Plans {
+    protected fadeIn = inject(FadeInOnScroll);
+
     protected readonly plans: IPlan[] = [
     {
       name: 'Light',
