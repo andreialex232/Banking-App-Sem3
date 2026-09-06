@@ -1,6 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'tailwindcss';
-
 *, *::after, *::before {
     box-sizing: border-box;
 }
@@ -9,21 +8,46 @@ html, body {
     width: 100%;
 }
 
-@layer components {
-    
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(44px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
+@layer components {
+    .input,
+    .input-confirm-password {
+    @apply block w-full rounded-md bg-white/5 px-3 py-1.5 text-base outline outline-1 outline-[var(--color-input-border)] -outline-offset-1 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6;
+
+        &.ng-invalid.ng-touched {
+            @apply outline-red-500 focus:outline-red-500;
+        }
+
+        &.input-success {
+            @apply outline-green-500 focus:outline-green-500;
+        }
+    }
+}
+
 
 @theme {
     /* Fonts */
-    --font-quicksand: "Quicksand", sans-serif; 
-    --font-dm: "DMSans", sans-serif;
-    --font-primary: "DMSans", sans-serif;
+    /* --font-quicksand: "Quicksand", sans-serif;  */
+    --font-dm: "DM Sans", sans-serif;
+    --font-sans: "DM Sans", sans-serif;
     /* Colors */
     --color-grey: #222222;
     --color-orange: #FF6D1F;
     --color-beige: #F5E7C6;
     --color-light-beige: #FAF3E1;
     --color-white: #fff;
+    --color-input-border: #D1D5DB;
+    --color-input-placeholder: #9CA3AF;
     /* Animations */
-
+    --animate-fade-in: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
