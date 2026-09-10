@@ -2,10 +2,12 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from "@angular/forms";
 
 export const postalCodeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
 
-    const countryInput = control.get('country')?.value;
+    const countryInput = control.parent?.get('country')?.value;
     const postalCodeInput = control.value;
 
-    if(!countryInput || !postalCodeInput) return null;
+    /* if(!countryInput || !postalCodeInput) return null; */
+    if(!countryInput) return { missingCountry: true };
+    if(!postalCodeInput) return null;
 
     const regexPattern: Record<string,RegExp> = {
         Denmark: /^\d{4}$/,
