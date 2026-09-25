@@ -1,5 +1,5 @@
-import { Component, effect, input } from '@angular/core';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { Component, effect, input, signal } from '@angular/core';
+import { ReactiveFormsModule, FormControl, AbstractControl } from '@angular/forms';
 import { markIfInvalid, showSuccess } from '@shared/utils/form.utils';
 
 @Component({
@@ -12,8 +12,8 @@ import { markIfInvalid, showSuccess } from '@shared/utils/form.utils';
   template: `
 <div>
     <label [for]="id()" class="grid grid-cols-1 text-sm/6 font-medium">
-        <span [class.opacity-0]="control().invalid && control().touched" class="col-start-1 row-start-1 transition-opacity duration-150">{{ label() }}</span>
-        <span [class.opacity-0]="control().invalid && control().untouched" class="col-start-1 row-start-1 text-red-500 transition-opacity duration-150">
+        <span [class.opacity-0]="control().invalid && control().touched" class="col-start-1 row-start-1 ">{{ label() }}</span>
+        <span [class.opacity-0]="control().invalid && control().untouched" class="col-start-1 row-start-1 text-danger">
             <ng-content select="[errors]"></ng-content>
         </span>
     </label>
@@ -24,8 +24,8 @@ import { markIfInvalid, showSuccess } from '@shared/utils/form.utils';
             [type]="type()" 
             [name]="id()" 
             [autocomplete]="autocomplete()" 
-            (blur)="markIfInvalid(control())"
-            [class.input-success]="showSuccess(control())"
+            (blur)="onBlur()"
+            [class.input-success]="showSuccess(control(), hasBeenInvalid())"
             class="input">
     </div>
 </div>
@@ -33,19 +33,11 @@ import { markIfInvalid, showSuccess } from '@shared/utils/form.utils';
   styles: ``,
 })
 export class InputField {
-    constructor() {
-        effect(() => {
-            if(this.disabled()) {
-                this.control().disable();
-            } else {
-                this.control().enable();
-            }
-        })
-    }
 
     markIfInvalid = markIfInvalid;
     showSuccess = showSuccess;
 
+    hasBeenInvalid = signal(false);
     disabled = input<boolean>(false);
     label = input.required<string>();
     colSpan = input<string>('sm:col-span-3');
@@ -53,4 +45,15 @@ export class InputField {
     control = input.required<FormControl>();
     id = input.required<string>();
     autocomplete = input<string>('off');
+
+    trackInvalidState(): void {
+        if(this.control().invalid) {
+            this.hasBeenInvalid.set(true);
+        }
+    }
+
+    onBlur(): void {
+        this.trackInvalidState();
+        markIfInvalid(this.control());
+    }
 }
