@@ -6,7 +6,6 @@ export const postalCodeValidator: ValidatorFn = (control: AbstractControl): Vali
     const postalCodeInput = control.value;
 
     /* if(!countryInput || !postalCodeInput) return null; */
-    if(!countryInput) return { missingCountry: true };
     if(!postalCodeInput) return null;
 
     const regexPattern: Record<string,RegExp> = {

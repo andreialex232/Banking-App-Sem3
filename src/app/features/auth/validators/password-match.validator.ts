@@ -34,7 +34,7 @@ export const passwordMatchValidator: ValidatorFn = (control: AbstractControl): V
     const password = control.parent?.get('password')?.value;
     const confirmPassword = control.value
 
-    if(!password || !confirmPassword) return null;
+    if (!password || !confirmPassword) return null;
 
     if(password === confirmPassword) {
         return null;
