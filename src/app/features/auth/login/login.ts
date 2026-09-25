@@ -1,48 +1,54 @@
-import { Component, inject } from '@angular/core';
-import { AuthFormComponent } from '../components/auth-form-component/auth-form-component';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { NonNullableFormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AuthService } from '@core/auth/auth-service';
+import { Button } from '@shared/ui/button/button';
+import { InputField } from '../components/input-field/input-field';
+import { scrollToFirstInvalidField, getAppwriteError } from '@shared/utils/form.utils';
+import { NavigationService } from '@core/services/navigation-service';
 
 @Component({
   selector: 'app-login',
-  imports: [AuthFormComponent],
-  template: `
-<app-auth-form-component 
-    [messages]="news" 
-    variant="login"
-    [form]="loginForm">
-    <span sidebar-title class="text-orange">Latest news</span>
-</app-auth-form-component>
-  `,
+  imports: [ReactiveFormsModule, Button, InputField],
+  templateUrl: './login.html',
   styles: ``,
 })
 export class Login {
-    private fb = inject(FormBuilder);
+    private fb = inject(NonNullableFormBuilder);
+    private auth = inject(AuthService);
+    private nav = inject(NavigationService);
+    protected readonly isSubmitting = signal(false);
+    protected readonly errorMessage = signal<string | null>(null);
 
     loginForm = this.fb.group({
         email: ['', [Validators.required, Validators.email]],
         password: ['', [Validators.required]]
     });
 
-    protected readonly news = [
-        {
-            title: 'Instant SEPA',
-            description: 'Send and receive funds across Europe in under 10 seconds with zero execution fees.'
-        },
-        {
-            title: 'Biometric & Passkey Support',
-            description: 'Log in securely using Face ID or your fingerprint—no passwords required.'
-        },
-        {
-            title: 'High-Yield Vault Rates',
-            description: 'Interest on flexible savings vaults has been bumped to 3.5% p.a., paid out monthly.'
-        },
-        {
-            title: 'Single-Use Virtual Cards',
-            description: 'Instantly lock, freeze, or regenerate temporary cards directly from your settings.'
-        },
-        {
-            title: 'Tap & Pay Integration',
-            description: 'Connect your banking cards to Apple Pay and Google Wallet with a single tap.'
-        },
-    ]
+    async tryLogin(): Promise<void> {
+        this.loginForm.updateValueAndValidity();
+        scrollToFirstInvalidField(this.loginForm);
+
+        if(this.loginForm.invalid) return;
+
+        this.startSubmission();
+
+        const { email, password } = this.loginForm.getRawValue();
+        try {
+            await this.auth.logIn(email, password);
+            await this.nav.redirectUser('user/overview');
+        } catch(error: unknown) {
+            getAppwriteError(error);
+        } finally {
+            this.isSubmitting.set(false);
+        }
+    }
+
+    private startSubmission() {
+        this.isSubmitting.set(true);
+        this.errorMessage.set(null);
+    }
+
+
+
+
 }
