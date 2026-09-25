@@ -1,6 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'tailwindcss';
-
 *, *::after, *::before {
     box-sizing: border-box;
 }
@@ -9,21 +8,85 @@ html, body {
     width: 100%;
 }
 
-@layer components {
-    
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(44px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 
 @theme {
     /* Fonts */
-    --font-quicksand: "Quicksand", sans-serif; 
-    --font-dm: "DMSans", sans-serif;
-    --font-primary: "DMSans", sans-serif;
+    /* --font-quicksand: "Quicksand", sans-serif;  */
+    --font-dm: "DM Sans", sans-serif;
+    --font-sans: "DM Sans", sans-serif;
+
     /* Colors */
+    --color-app-bg: #f8f7f4; /* Page background, cards */
+    --color-surface: #ffffff; /* Elevated cards, modal backgrounds */
+    --color-border-subtle: #e2e4e9; /* Input borders, card borders, dividers */
+
+    --color-primary: #0057ff; /* Buttons, active tabs, main CTA fills */
+    --color-primary-hover: #0043c7;
+    --color-primary-soft: #e6eeff; /* Badge backgrounds, subtle row highlights */
+
+    --color-text-main: #0f172a;
+    --color-text-muted: #525866; /* Labels, placeholders, secondary text */
+
+    --color-danger: #d92d20;
+    --color-success: #027a48;
+    --color-warning: #b54708;
+
+
+
+
     --color-grey: #222222;
     --color-orange: #FF6D1F;
     --color-beige: #F5E7C6;
     --color-light-beige: #FAF3E1;
     --color-white: #fff;
+    --color-input-border: #D1D5DB;
+    --color-input-placeholder: #9CA3AF;
     /* Animations */
+    --animate-fade-in: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
+@layer components {
+    .btn-base {
+        @apply  flex items-center justify-center gap-2 font-dm font-semibold px-6 py-3
+            rounded-lg border-none outline-none text-center cursor-pointer
+            shadow-md transition-all
+            -translate-y-0 hover:-translate-y-0.5 hover:shadow-lg
+            active:translate-y-0
+            focus-visible:outline-2 focus-visible:outline-offset-2
+            disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none;
+    }
+
+    .btn-primary {
+        @apply text-white bg-primary
+            focus-visible:outline-primary
+            hover:bg-primary-hover;
+    }
+
+    .input,
+    .input-confirm-password {
+        @apply block w-full rounded-md bg-white/5 px-3 py-1.5 text-base outline outline-1 outline-[var(--color-input-border)] -outline-offset-1 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6;
+
+        &.ng-invalid.ng-touched {
+            @apply outline-danger focus:outline-danger;
+        }
+
+        &.input-success {
+            @apply outline-success focus:outline-success;
+        }
+
+        &:disabled {
+            @apply opacity-50 bg-white/10 cursor-not-allowed;
+        }
+    }
 }
