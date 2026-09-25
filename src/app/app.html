@@ -1,5 +1,8 @@
-<app-header></app-header>
-<main>
-  <router-outlet></router-outlet>
-</main>
-<app-footer></app-footer>
+<div class="grid grid-cols-12 w-full w-[1280px]">
+	<app-header class="col-start-2 col-end-12 w-full pt-4 pb-4"></app-header>
+	<main class="col-span-12">
+		<router-outlet></router-outlet>
+	</main>
+	<app-footer class="w-full col-span-12"></app-footer>
+</div>
+
