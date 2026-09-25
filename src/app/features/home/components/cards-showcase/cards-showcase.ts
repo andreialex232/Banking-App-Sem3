@@ -1,10 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { Button } from "@/app/shared/ui/button/button";
 import { FadeInOnScroll } from '@shared/directives/fade-in-on-scroll';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-cards-showcase',
-  imports: [Button],
+  imports: [RouterLink],
   standalone: true,
   hostDirectives: [
     {
@@ -16,13 +16,13 @@ import { FadeInOnScroll } from '@shared/directives/fade-in-on-scroll';
 <div class="font-dm text-grey md:grid-flow-col grid grid-cols-12 md:gap-12 sm:gap-12 lg:gap-8 items-center">
     <!-- Left Side Text -->
     <div class="w-full col-start-2 col-end-12 md:col-start-3 md:col-end-12 lg:col-start-2 lg:col-end-7 flex flex-col gap-6 items-start">
-        <h2 class="text-3xl text-black sm:text-5xl font-bold capitalize">Cards for <span class="text-orange">your</span> lifestyle</h2>
+        <h2 class="text-3xl text-black sm:text-5xl font-bold capitalize">Cards for <span class="text-primary">your</span> lifestyle</h2>
         
-        <p class="text-base lg:text-lg text-black font-medium">Pick the perfect card to gear up for your daily spending. Whether you are traveling, shopping online, or saving for the future, match your card to your goals.</p>
+        <p class="text-base lg:text-lg text-text-muted font-medium">Pick the perfect card to gear up for your daily spending. Whether you are traveling, shopping online, or saving for the future, match your card to your goals.</p>
 
         <ul class="flex flex-col gap-2 md:text-md xl:text-base font-medium">
             <li class="flex items-center gap-2">
-                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-orange">
+                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-text-main">
                     <svg class="h-4 w-4 stroke-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                     </svg>
@@ -30,7 +30,7 @@ import { FadeInOnScroll } from '@shared/directives/fade-in-on-scroll';
                 Real-time spending alerts on your phone
             </li>
             <li class="flex items-center gap-2">
-                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-orange">
+                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-text-main">
                     <svg class="h-4 w-4 stroke-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                     </svg>
@@ -38,7 +38,7 @@ import { FadeInOnScroll } from '@shared/directives/fade-in-on-scroll';
                 Automatic cashback on everyday taps
             </li>
             <li class="flex items-center gap-2">
-                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-orange">
+                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-text-main">
                     <svg class="h-4 w-4 stroke-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                     </svg>
@@ -47,9 +47,9 @@ import { FadeInOnScroll } from '@shared/directives/fade-in-on-scroll';
             </li>
         </ul>
 
-        <app-button element="anchor" url="/">
+        <a class="btn-base btn-primary" routerLink="/register">
             Compare Cards
-        </app-button>
+        </a>
     </div>
 
     <!-- Right Side Image -->
