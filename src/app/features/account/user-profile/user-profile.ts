@@ -1,17 +1,18 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLinkWithHref, RouterLinkActive } from '@angular/router';
+import { INavigation } from '@core/models/navigation';
 
 @Component({
   selector: 'app-user-profile',
   imports: [RouterOutlet, RouterLinkWithHref, RouterLinkActive],
   template: `
   
-  <div class="grid grid-cols-12">
+  <div class="mt-[6rem] grid grid-cols-12">
     
     <!-- left side -->
     <div class="col-start-3 col-end-5">
         <!-- Image and name -->
-        <div class="border-b border-black flex justify-center items-center flex-col">
+        <div class="flex justify-center items-center flex-col my-4">
             <button
                 type="button"
                 class="cursor-pointer group flex flex-col items-center"
@@ -52,40 +53,30 @@ import { RouterOutlet, RouterLinkWithHref, RouterLinkActive } from '@angular/rou
             </span>
         </div>
         <ul class="font-medium">
-            <li class="p-2">
-                <a 
-                    routerLinkActive="bg-blue-500 text-white"
-                    [routerLinkActiveOptions]="{exact: true}"
-                    [routerLink]="['/overview']">
-                    Overview
-                </a>
-            </li>
-            <li class="p-2">
-                <a href="Settings">Setings</a>
-            </li>
-            <li class="p-2">
-                <a href="Settings">Subscriptions</a>
-            </li>
-            <li class="p-2">
-                <a href="Settings">Transaction History</a>
-            </li>
+            @for (item of nav; track item.name) {
+                <li routerLinkActive="active-link" 
+                    [routerLinkActiveOptions]="{ exact: false }"
+                    class="p-2 relative">
+                    <a  class="capitalize before:absolute before:inset-0"
+                        [routerLink]="item.href">
+                        {{ item.name }}
+                    </a>
+                </li>
+            }
         </ul>
-
-
-
-
-
-
-
     </div>
     <!-- End of left side -->
-
+    <!-- right side -->
+    <div class="col-start-6 col-end-12">
+        <router-outlet></router-outlet>
+    </div>
+    
 
 
 
   </div>
-  <!-- right side -->
-  <router-outlet></router-outlet>`,
+  
+  `,
   styles: ``,
 })
 export class UserProfile {
@@ -93,4 +84,23 @@ export class UserProfile {
     protected changeProfilePic () {
         console.log('Attempted to change profile pic')
     }
+
+    protected nav: INavigation[] = [
+        {
+            name: 'overview',
+            href: 'overview'
+        },
+        {
+            name: 'settings',
+            href: 'settings'   
+        },
+        {
+            name: 'subscriptions',
+            href: 'subscriptions'
+        },
+        {
+            name: 'transaction history',
+            href: 'transaction-history'
+        }
+    ]
 }

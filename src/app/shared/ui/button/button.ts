@@ -5,9 +5,13 @@ import { Component, input, output} from '@angular/core';
   imports: [],
   standalone: true,
   host: {
-    'class': 'btn-base',
+    'class': 'btn-base w-fit',
     '[class.btn-primary]': 'variant() === "primary"',
     '[class.btn-secondary]': 'variant() === "secondary"',
+    '[class.btn-danger]': 'variant() === "danger"',
+    '[class.btn-sm]': 'size() === "btn-sm"',
+    '[class.btn-md]': 'size() === "btn-md"',
+    '[class.btn-lg]': 'size() === "btn-lg"',
     '[class.btn-loading]': 'loading()',
     '[attr.aria-busy]': 'loading()',
     '[disabled]': 'disabled() || loading()',
@@ -28,8 +32,9 @@ import { Component, input, output} from '@angular/core';
   styles: ``,
 })
 export class Button {
-    readonly disabled = input(false);
+    readonly disabled = input<boolean>(false);
     readonly loading = input<boolean>(false);
     readonly buttonType = input.required<'button' | 'submit'>();
-    readonly variant = input<'primary' | 'secondary'>('primary');
+    readonly variant = input<'primary' | 'secondary' | 'danger'>('primary');
+    readonly size = input<'btn-sm' | 'btn-md' | 'btn-lg'>('btn-md');
 }

@@ -1,9 +1,9 @@
 import { CommonModule} from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { INavigation } from '@core/models/navigation';
 import { Logo } from '@shared/ui/logo/logo';
 import { RouterLink } from "@angular/router";
-import { AuthService } from '@core/auth/auth-service';
+import { AuthService } from '@core/services/auth/auth.service';
 import { Router } from '@angular/router';
 import { Button } from '@shared/ui/button/button';
 @Component({
@@ -50,12 +50,16 @@ import { Button } from '@shared/ui/button/button';
   `,
   styles: ``,
 })
-export class Header {
+export class Header implements OnInit {
     private auth = inject(AuthService);
     private router = inject(Router);
 
     protected currentUser = this.auth.currentUser;
     protected isLogouting = signal(false);
+
+    ngOnInit(): void {
+        /* this.auth.getCurrentUser(); */
+    }
 
     protected async logOut() {
         try {
