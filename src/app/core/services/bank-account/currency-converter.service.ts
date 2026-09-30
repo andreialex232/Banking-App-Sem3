@@ -1,7 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Observable, tap, map, of } from 'rxjs';
-import { SupportedCurrency, currencyLocaleMap, ConvertableCurrency } from '@core/models/currency/currency.models';
+import { SupportedCurrency, currencyLocaleMap } from '@core/models/currency/currency.models';
+import { AppwriteService } from '../appwrite.service';
+import { environment } from '@/environments/environment.development';
 
 interface FrankfurterResponse {
     base: string;
@@ -14,6 +16,7 @@ interface FrankfurterResponse {
 
 export class CurrencyService {
     private http = inject(HttpClient);
+    private appwrite = inject(AppwriteService)
     private ff = 'https://api.frankfurter.dev/v1/latest';
 
     ffData = signal<any>(null);
@@ -37,6 +40,15 @@ export class CurrencyService {
         const amountInEur = amount / rates[from];
         return amountInEur * rates[to];
     } */
+
+    convert(amount: number, from: SupportedCurrency, to: SupportedCurrency): Observable<number> {
+        if (from === to) return of(amount);
+        const f = from.toUpperCase();
+        const t = to.toUpperCase();
+        return this.http
+            .get<FrankfurterResponse>(`${this.ff}?base=${f}&symbols=${t}`)
+            .pipe(map(({ rates }) => amount * rates[t]));
+    } 
 
     toEur(amount: number, currency: SupportedCurrency): Observable<number> {
         if (currency === 'eur') return of(amount);
