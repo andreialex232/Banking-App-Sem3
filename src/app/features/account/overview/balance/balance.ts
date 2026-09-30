@@ -7,14 +7,16 @@ import { SupportedCurrency } from '@core/models/currency/currency.models';
 import { Chart, registerables } from 'chart.js';
 import { AuthService } from '@core/services/auth/auth.service';
 import { BankAccountService } from '@core/services/bank-account/bank-account.service';
+import { CurrencyConverter } from './currency-converter/currency-converter';
 import { Button } from '@shared/ui/button/button';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
+import { AmountField } from '@shared/forms/amount-field/amount-field';
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-balance',
-  imports: [Button, FormsModule, DecimalPipe],
+  imports: [Button, FormsModule, DecimalPipe, CurrencyConverter, AmountField],
   templateUrl: `./balance.html`,
   styles: ``,
 })
@@ -26,10 +28,18 @@ export class Balance implements OnInit, AfterViewInit {
     private currencyService = inject(CurrencyService);
     private router = inject(Router);
 
+    form = new FormGroup({
+        depositAmount: new FormControl<number | null>(null, [
+            Validators.required,
+            Validators.min(0.01),
+            Validators.max(1_000_000)
+        ])
+    })
+    get depositAmount() {return this.form.controls.depositAmount; }
+
     @ViewChild('donutCanvas') donutCanvas!: ElementRef<HTMLCanvasElement>;
     chart!: Chart;
 
-    depositAmount = signal<number | null>(null);
     currency = signal<SupportedCurrency | null>(null);
     bankAccount = this.bankAccountService.bankAccount;
     dailyLimit = this.bankAccountService.dailyLimit;
@@ -101,14 +111,16 @@ export class Balance implements OnInit, AfterViewInit {
     private async runTransaction(action: (account: BankAccount, curr: SupportedCurrency, amount: number) => Promise<void>) {
         const account = this.bankAccount();
         const curr = this.currency();
-        const amount = this.depositAmount();
-        if (!account || !curr || !amount) return;
+        const { depositAmount } = this.form.getRawValue();
+        /* const amount = this.depositAmount(); */
+        if (!account || !curr || !depositAmount) return;
 
         this.isProcessing.set(true);
         this.error.set('');
         try {
-            await action(account, curr, amount);
-            this.depositAmount.set(null);
+            await action(account, curr, depositAmount);
+            this.form.reset();
+            /* this.depositAmount.set(null); */
         } catch (err) {
             this.error.set(err instanceof Error ? err.message : 'Something went wrong');
         } finally {
