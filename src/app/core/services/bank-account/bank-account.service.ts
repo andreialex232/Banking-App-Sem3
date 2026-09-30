@@ -114,4 +114,32 @@ export class BankAccountService {
 
         await this.setCurrencyAmount(accountRowId, currency, currentAmount - amount);
     }
+
+        async transfer(rowId: string, from: SupportedCurrency, to: SupportedCurrency, amount: number) {
+            if (amount <= 0) throw new Error('Amount must be positive');
+            if (from === to) throw new Error('Choose two different currencies');
+
+            const account = this.bankAccount();
+            if (!account) throw new Error('No account loaded');
+
+            const fromAmount = account[from];
+            const toAmount = account[to];
+            if (fromAmount === null) throw new Error(`${from.toUpperCase()} account has not been added yet`);
+            if (toAmount === null) throw new Error(`${to.toUpperCase()} account has not been added yet`);
+            if (amount > fromAmount) throw new Error('Insufficient funds');
+            
+            let converted: number;
+            try {
+                converted = await firstValueFrom(this.cc.convert(amount, from, to));
+            } catch {
+                throw new Error('Could not fetch the exchange rate. Try again later.');
+            }
+
+            await this.updateAccount(rowId, {
+                [from]: Math.round((fromAmount - amount) * 100 / 100),
+                [to]: Math.round((toAmount + converted) * 100 / 100)
+            });
+
+            return converted;
+        }
 }
