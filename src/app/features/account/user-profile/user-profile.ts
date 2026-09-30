@@ -7,7 +7,7 @@ import { INavigation } from '@core/models/navigation';
   imports: [RouterOutlet, RouterLinkWithHref, RouterLinkActive],
   template: `
   
-  <div class="mt-[6rem] grid grid-cols-12">
+<div class="mt-[6rem] grid grid-cols-12">
     
     <!-- left side -->
     <div class="col-start-3 col-end-5">
@@ -67,14 +67,14 @@ import { INavigation } from '@core/models/navigation';
     </div>
     <!-- End of left side -->
     <!-- right side -->
-    <div class="col-start-6 col-end-12">
+    <div class="shadow-custom-big mb-40 p-10 col-start-6 col-end-12">
         <router-outlet></router-outlet>
     </div>
     
 
 
 
-  </div>
+</div>
   
   `,
   styles: ``,

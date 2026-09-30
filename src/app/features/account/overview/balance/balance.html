@@ -1,5 +1,5 @@
-<div class="flex p-6 justify-around">
-    <div class="grid grid-cols-12">
+<div class="flex justify-around flex-col gap-14">
+    <div class="shadow-custom-sm pb-4 pr-4 pl-4 grid grid-cols-12">
         <div class="col-start-1 col-end-5 flex gap-4 flex-col h-full">
             <div class="position-relative w-42 h-42">
                 <canvas #donutCanvas></canvas>
@@ -15,12 +15,16 @@
 
         <div class="col-start-6 col-end-13 flex flex-col justify-between items-end">
             <div class="flex gap-2 items-center">
-                <input
+                <app-amount-field
+                    [control]="depositAmount"
+                    id="amount">
+                </app-amount-field>
+                <!-- <input
                     type="number"
                     [ngModel]="depositAmount()"
                     (ngModelChange)="depositAmount.set($event)"
                     placeholder="Amount"
-                    class="border border-gray-300 rounded-md px-3 py-2 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
+                    class="border border-gray-300 rounded-md px-3 py-2 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" /> -->
 
                 <button appButton buttonType="button" (click)="addFunds()" size="btn-sm" [loading]="isProcessing()" class="btn-base btn-sm btn-primary">
                     Add funds
@@ -46,6 +50,8 @@
                     </button>
                 }
         </div>
+
+        
     </div>
-    
+    <app-currency-converter class="shadow-custom-sm"></app-currency-converter>
 </div>
