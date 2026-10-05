@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { AppwriteService } from '@core/services/appwrite.service';
-import { Query, ID } from 'appwrite';
+import { Query } from 'appwrite';
 import { environment } from '@/environments/environment.development';
 import { SupportedCurrency } from '@core/models/currency/currency.models';
 import { BankAccount } from '@core/models/bank-account/bank-account.models';
@@ -80,8 +80,8 @@ export class BankAccountService {
         }
 
         await this.updateAccount(accountRowId, {
-            [currency]: currentAmount + amount,
-            dailyDepositedEur: Math.round((usedToday + amountEur) * 100) / 100,
+            [currency]: this.round2(currentAmount + amount),
+            dailyDepositedEur: this.round2(usedToday + amountEur),
             dailyDepositDate: this.today(),
         });
     }
@@ -112,7 +112,7 @@ export class BankAccountService {
         if (currentAmount === null) throw new Error(`${currency.toUpperCase()} account has not been added yet`);
         if (amount > currentAmount) throw new Error('Insufficient funds');
 
-        await this.setCurrencyAmount(accountRowId, currency, currentAmount - amount);
+        await this.setCurrencyAmount(accountRowId, currency, this.round2(currentAmount - amount));
     }
 
     async transfer(rowId: string, from: SupportedCurrency, to: SupportedCurrency, amount: number) {
@@ -136,8 +136,8 @@ export class BankAccountService {
         }
 
         await this.updateAccount(rowId, {
-            [from]: Math.round((fromAmount - amount) * 100 / 100),
-            [to]: Math.round((toAmount + converted) * 100 / 100)
+            [from]: this.round2(fromAmount - amount),
+            [to]: this.round2(toAmount + converted)
         });
 
         return converted;
@@ -187,11 +187,15 @@ export class BankAccountService {
                 databaseId: environment.appwriteDatabaseId,
                 tableId: environment.appwriteBankAccountsId,
                 rowId: receiver.$id,
-                data: { [currency]: Math.round((receiverAmount + amount) * 100) / 100 }
+                data: { [currency]: this.round2(receiverAmount + amount) }
             });
         } catch {
             await this.setCurrencyAmount(accountRowId, currency, currentAmount);
             throw new Error('Transfer failed, you were refunded');
         }
+    }
+
+    private round2(value: number): number {
+        return Math.round(value * 100) / 100;
     }
 }
