@@ -3,7 +3,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { passwordMatchValidator } from '../validators/password-match.validator';
 import { postalCodeValidator } from '../validators/postal-code.validators';
 import { InputField } from '../components/input-field/input-field';
-import { markIfInvalid, scrollToFirstInvalidField } from '@shared/utils/form.utils';
+import { getAppwriteError, markIfInvalid, scrollToFirstInvalidField } from '@shared/utils/form.utils';
 import { AuthService } from '@core/services/auth/auth.service';
 import { NavigationService } from '@core/services/navigation.service';
 import { RouterLink } from '@angular/router';
@@ -23,6 +23,7 @@ export class Register implements OnInit {
     private nav = inject(NavigationService);
     private destroyRef = inject(DestroyRef);
     protected isSubmitting = signal(false);
+    protected otherError = signal<string | null>(null)
 
     ngOnInit(): void {
         const { country, postalCode } = this.registerForm.controls;
@@ -65,7 +66,7 @@ export class Register implements OnInit {
             await this.auth.register(payload);
             await this.nav.redirectUser('user/overview');
         } catch(error) {
-            console.log('Registration failed', error)
+            this.otherError.set(getAppwriteError(error));
         } finally {
             this.isSubmitting.set(false);
         }

@@ -45,9 +45,9 @@ function mapErrorMessage(type: string, fallbackMessage?: string): string {
             return 'Account banned or suspended';
         case 'general_rate_limit_exceeded':
             return 'Too many failed login attempts';
-        case 'user_email_already_exists':
-            return 'Email already in use';
+        case 'user_already_exists':
+            return 'User already exists';
         default: 
-            return fallbackMessage || 'Authentication failed';
+            return fallbackMessage || 'Authentication failed, try again later';
     }
 };
