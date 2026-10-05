@@ -37,7 +37,7 @@ export class Login {
             await this.auth.logIn(email, password);
             await this.nav.redirectUser('user/overview');
         } catch(error: unknown) {
-            getAppwriteError(error);
+            this.errorMessage.set(getAppwriteError(error));
         } finally {
             this.isSubmitting.set(false);
         }
