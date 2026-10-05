@@ -1,0 +1,58 @@
+<div class="flex justify-around flex-col gap-14">
+    <div class="shadow-custom-sm pb-4 pr-4 pl-4 grid grid-cols-12">
+        <div class="col-start-1 col-end-5 flex gap-4 flex-col h-full">
+            <div class="position-relative w-42 h-42">
+                <canvas #donutCanvas></canvas>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <div class="font-semibold text-xs text-gray-500 flex flex-col">
+                    <div>Deposited today: {{ depositedToday() | number: '1.0-2' }} of {{ dailyLimit() | number }} EUR ({{ usedPercentage() }}%)</div>
+                    <div class="">Important! The daily deposit limit applies to all your accounts combined, converted to EUR ({{ bankAccount()?.plan }} plan).</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-start-6 col-end-13 flex flex-col justify-between items-end">
+            <div class="flex gap-2 items-center">
+                <app-amount-field
+                    [control]="depositAmount"
+                    id="amount">
+                </app-amount-field>
+                <!-- <input
+                    type="number"
+                    [ngModel]="depositAmount()"
+                    (ngModelChange)="depositAmount.set($event)"
+                    placeholder="Amount"
+                    class="border border-gray-300 rounded-md px-3 py-2 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" /> -->
+
+                <button appButton buttonType="button" (click)="addFunds()" size="btn-sm" [loading]="isProcessing()" class="btn-base btn-sm btn-primary">
+                    Add funds
+                </button>
+
+                <button appButton buttonType="button"  (click)="removeFunds()" size="btn-sm" [loading]="isProcessing()" class="btn-base btn-sm btn-danger">
+                    Remove funds
+                </button>
+                @if (error()) {
+                    <p class="text-sm text-red-600">{{ error() }}</p>
+                }
+            </div>
+
+            @if(currency() !== 'eur') {
+                    <button
+                        [loading]="isDeleting()"
+                        (click)="removeCurrency()"
+                        buttonType="button"
+                        variant="danger"
+                        size="btn-sm"
+                        appButton>
+                        Delete <span class="uppercase">{{currency()}}</span> account
+                    </button>
+                }
+        </div>
+
+        
+    </div>
+    <app-currency-converter class="shadow-custom-sm"></app-currency-converter>
+    <app-send-balance class="shadow-custom-sm"></app-send-balance>
+</div>

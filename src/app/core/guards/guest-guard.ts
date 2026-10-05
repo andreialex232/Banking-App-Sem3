@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '@core/auth/auth-service';
+import { AuthService } from '@core/services/auth/auth.service';
 
 export const guestGuard: CanActivateFn = async (route, state) => {
     const auth = inject(AuthService);

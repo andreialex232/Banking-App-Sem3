@@ -41,23 +41,16 @@ html, body {
     --color-text-main: #0f172a;
     --color-text-muted: #525866; /* Labels, placeholders, secondary text */
 
+    /* Overview dashboard */
+
     --color-danger: #d92d20;
+    --color-danger-hover: #b91c1c;
     --color-success: #027a48;
     --color-warning: #b54708;
-<<<<<<< Updated upstream
-
-=======
-    
+  
     --shadow-custom: rgba(0, 0, 0, 0.3) 0px 19px 38px, 
                      rgba(0, 0, 0, 0.22) 0px 15px 12px;
-<<<<<<< Updated upstream
-=======
-
     --shadow-custom-sm: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
-
-
 
     --color-grey: #222222;
     --color-orange: #FF6D1F;
@@ -71,8 +64,8 @@ html, body {
 }
 
 @layer components {
-    .btn-base {
-        @apply  flex items-center justify-center gap-2 font-dm font-semibold px-6 py-3
+    /* .btn-base {
+        @apply flex items-center justify-center gap-2 font-dm font-semibold px-6 py-3
             rounded-lg border-none outline-none text-center cursor-pointer
             shadow-md transition-all
             -translate-y-0 hover:-translate-y-0.5 hover:shadow-lg
@@ -85,6 +78,44 @@ html, body {
         @apply text-white bg-primary
             focus-visible:outline-primary
             hover:bg-primary-hover;
+    } */
+
+    .btn-base {
+        @apply inline-flex items-center justify-center gap-2 font-dm font-semibold
+            rounded-lg border-none outline-none text-center cursor-pointer
+            shadow-md transition-all
+            -translate-y-0 hover:-translate-y-0.5 hover:shadow-lg
+            active:translate-y-0
+            focus-visible:outline-2 focus-visible:outline-offset-2
+            disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none;
+    }
+
+    .btn-sm {
+        @apply px-4 py-2 text-sm;
+    }
+
+    .btn-md {
+        @apply px-6 py-3 text-base;
+    }
+
+    .btn-lg {
+        @apply px-8 py-4 text-lg;
+    }
+
+    .btn-primary {
+        @apply text-white bg-primary
+            focus-visible:outline-primary
+            hover:bg-primary-hover;
+    }
+
+    .btn-danger {
+        @apply text-white bg-danger
+            focus-visible:outline-danger
+            hover:bg-danger-hover;
+    }
+
+    .active-link {
+        @apply bg-primary text-white
     }
 
     .input,

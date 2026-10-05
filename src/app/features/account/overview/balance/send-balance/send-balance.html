@@ -1,0 +1,70 @@
+<div class="flex items-center gap-4">
+    <div class="w-2 h-12 shrink-0 bg-primary"></div>
+    <div class="text-xl">Send Money</div>
+</div>
+<section class="py-6">
+    <div class="grid grid-cols-12">
+
+        <!-- Sender -->
+        <div class="col-span-5 flex justify-start items-center flex-col my-4">
+            @if (profile(); as p) {
+                <app-profile-badge
+                    [imageUrl]="avatarUrl()"
+                    [userEmail]="p.email"
+                    [userName]="fullName()">
+                </app-profile-badge>
+            }
+            <div class="flex flex-col items-center mt-4 gap-2">
+                <app-amount-field id="number" [control]="amount"></app-amount-field>
+                <p class="font-semibold text-xs text-gray-500">Will always transfer from EUR to EUR</p>
+            </div>
+        </div>
+
+        <!-- Arrow (mt-10 = my-4 + label height, h-24 = avatar height) -->
+        <div class="col-span-2 flex justify-center items-start">
+            <div class="mt-10 h-24 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter" role="img" aria-label="Arrow">
+                    <path d="M3 12 H20 M14 6 L20 12 L14 18"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Payee -->
+        <div class="col-span-5 flex justify-start items-center flex-col my-4">
+            <app-profile-badge
+                [userName]="recipient()?.name ?? 'John Smith'"
+                [imageUrl]="recipient()?.image">
+            </app-profile-badge>
+            <form class="flex flex-col gap-1.5" [formGroup]="recipientForm" (ngSubmit)="lookup()">
+                <input 
+                    (blur)="lookup()"
+                    class="input w-full aria-invalid:border-red-500"
+                    [formControl]="email"
+                    inputmode="email"
+                    id="email"
+                    placeholder="name@example.com"
+                    [attr.aria-invalid]="email.touched && email.invalid"
+                    type="email">
+                <div class="flex gap-2 items-center ">
+                    <button
+                        [loading]="isSending()"
+                        appButton
+                        size="btn-sm"
+                        (click)="send()"
+                        buttonType="button"
+                        class="mt-4">
+                        Send
+                    </button>
+                    <!-- Placeholder -->
+                    <p class="mt-4 font-semibold text-xs text-gray-500">
+                        {{ isLooking() ? 'Looking up recipient...' : state() }}
+                    </p>
+                </div>
+                
+            </form>
+
+            
+        </div>
+
+    </div>
+</section>
