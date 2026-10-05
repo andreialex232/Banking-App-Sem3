@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { AppwriteService } from '@core/services/appwrite.service';
-import { Query } from 'appwrite';
+import { Query, ID } from 'appwrite';
 import { environment } from '@/environments/environment.development';
 import { SupportedCurrency } from '@core/models/currency/currency.models';
 import { BankAccount } from '@core/models/bank-account/bank-account.models';
@@ -115,31 +115,83 @@ export class BankAccountService {
         await this.setCurrencyAmount(accountRowId, currency, currentAmount - amount);
     }
 
-        async transfer(rowId: string, from: SupportedCurrency, to: SupportedCurrency, amount: number) {
-            if (amount <= 0) throw new Error('Amount must be positive');
-            if (from === to) throw new Error('Choose two different currencies');
+    async transfer(rowId: string, from: SupportedCurrency, to: SupportedCurrency, amount: number) {
+        if (amount <= 0) throw new Error('Amount must be positive');
+        if (from === to) throw new Error('Choose two different currencies');
 
-            const account = this.bankAccount();
-            if (!account) throw new Error('No account loaded');
+        const account = this.bankAccount();
+        if (!account) throw new Error('No account loaded');
 
-            const fromAmount = account[from];
-            const toAmount = account[to];
-            if (fromAmount === null) throw new Error(`${from.toUpperCase()} account has not been added yet`);
-            if (toAmount === null) throw new Error(`${to.toUpperCase()} account has not been added yet`);
-            if (amount > fromAmount) throw new Error('Insufficient funds');
-            
-            let converted: number;
-            try {
-                converted = await firstValueFrom(this.cc.convert(amount, from, to));
-            } catch {
-                throw new Error('Could not fetch the exchange rate. Try again later.');
-            }
-
-            await this.updateAccount(rowId, {
-                [from]: Math.round((fromAmount - amount) * 100 / 100),
-                [to]: Math.round((toAmount + converted) * 100 / 100)
-            });
-
-            return converted;
+        const fromAmount = account[from];
+        const toAmount = account[to];
+        if (fromAmount === null) throw new Error(`${from.toUpperCase()} account has not been added yet`);
+        if (toAmount === null) throw new Error(`${to.toUpperCase()} account has not been added yet`);
+        if (amount > fromAmount) throw new Error('Insufficient funds');
+        
+        let converted: number;
+        try {
+            converted = await firstValueFrom(this.cc.convert(amount, from, to));
+        } catch {
+            throw new Error('Could not fetch the exchange rate. Try again later.');
         }
+
+        await this.updateAccount(rowId, {
+            [from]: Math.round((fromAmount - amount) * 100 / 100),
+            [to]: Math.round((toAmount + converted) * 100 / 100)
+        });
+
+        return converted;
+    }
+
+
+    private async findUserIdByEmail(email: string): Promise<string> {
+        const result = await this.appwrite.tablesDB.listRows({
+            databaseId: environment.appwriteDatabaseId,
+            tableId: environment.appwriteProfilesTableId,
+            queries: [Query.equal('email', email.trim().toLowerCase())]
+        });
+
+        const profile = result.rows[0];
+        if (!profile) throw new Error('Recipient not found');
+
+        return profile['userId'] as string;
+    }
+
+    async send(accountRowId: string, toUserId: string, currency: SupportedCurrency, amount: number) {
+        if (amount <= 0) throw new Error('Amount must be positive');
+
+        const account = this.bankAccount();
+        if (!account) throw new Error('No account loaded');
+        if (toUserId === account.userId) throw new Error('Cannot send money to yourself');
+
+        const currentAmount = account[currency];
+        if (currentAmount === null) throw new Error(`${currency.toUpperCase()} account has not been added yet`);
+        if (amount > currentAmount) throw new Error('Insufficient funds');
+
+        const res = await this.appwrite.tablesDB.listRows({
+            databaseId: environment.appwriteDatabaseId,
+            tableId: environment.appwriteBankAccountsId,
+            queries: [Query.equal('userId', toUserId), Query.limit(1)]
+        });
+
+        const receiver = res.rows[0];
+        if (!receiver) throw new Error('Recipient has no bank account');
+
+        const receiverAmount = receiver[currency] as number | null;
+        if (receiverAmount === null) throw new Error(`Recipient has no ${currency.toUpperCase()} account`);
+
+        await this.withdraw(accountRowId, currency, amount);
+
+        try {
+            await this.appwrite.tablesDB.updateRow({
+                databaseId: environment.appwriteDatabaseId,
+                tableId: environment.appwriteBankAccountsId,
+                rowId: receiver.$id,
+                data: { [currency]: Math.round((receiverAmount + amount) * 100) / 100 }
+            });
+        } catch {
+            await this.setCurrencyAmount(accountRowId, currency, currentAmount);
+            throw new Error('Transfer failed, you were refunded');
+        }
+    }
 }
