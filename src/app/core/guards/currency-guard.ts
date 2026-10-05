@@ -11,6 +11,7 @@ export const currencyGuard: CanActivateFn = (route, state) => {
         return true;
     }
 
-    router.navigate(['/overview/eur']);
-    return false;
+    return router.createUrlTree(['/user/overview/eur']);
+    /* router.navigate(['/user/overview/eur']); */
+    /* return false; */
 };
