@@ -3,6 +3,7 @@ import { AppwriteService } from '@core/services/appwrite.service';
 import { ID, Permission, Role, Models } from 'appwrite';
 import { environment } from '@/environments/environment.development';
 import { BankAccountService } from '../bank-account/bank-account.service';
+import { ProfileService } from '../profile.service';
 
 export interface RegisterPayload {
     email: string;
@@ -20,6 +21,8 @@ export interface RegisterPayload {
 export class AuthService {
     private bankAccountService = inject(BankAccountService);
     private appwrite = inject(AppwriteService);
+    private profileService = inject(ProfileService);
+
     public currentUser = signal<Models.User<Models.Preferences> | null>(null);
 
     async getCurrentUser(forceRefresh = false) {
@@ -30,6 +33,7 @@ export class AuthService {
         try {
             const user = await this.appwrite.account.get();
             this.currentUser.set(user);
+            await this.loadUserData(user.$id);
             return user;
         } catch {
             this.currentUser.set(null);
@@ -47,6 +51,7 @@ export class AuthService {
         } finally {
             this.currentUser.set(null);
             this.bankAccountService.bankAccount.set(null);
+            this.profileService.profile.set(null);
         };
     };
 
@@ -89,6 +94,7 @@ export class AuthService {
             rowId: ID.unique(),
             data: {
                 userId: userId,
+                email: data.email.trim().toLowerCase(),
                 firstName: data.firstName,
                 lastName: data.lastName,
                 country: data.country,
@@ -130,9 +136,22 @@ export class AuthService {
         await this.logIn(data.email, data.password);
         try {
             await this.insertRows(data, accountId);
+            await this.loadUserData(accountId);
         } catch (err) {
             console.error(err);
+            throw new Error('Account created, but setting up your profile failed. Please contact support.');
         }
        
+    }
+
+    private async loadUserData(userId: string) {
+        try {
+            await Promise.all([
+                this.profileService.loadProfile(userId, true),
+                this.bankAccountService.loadBankAccount(userId, true),
+            ]);
+        } catch (err) {
+            console.error('Could not load user data:', err);
+        }
     }
 }

@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterOutlet, RouterLinkWithHref, RouterLinkActive } from '@angular/router';
 import { INavigation } from '@core/models/navigation';
+import { ProfileService } from '@core/services/profile.service';
+import { ProfileBadge } from '@shared/ui/profile-badge/profile-badge';
 
 @Component({
   selector: 'app-user-profile',
-  imports: [RouterOutlet, RouterLinkWithHref, RouterLinkActive],
+  imports: [RouterOutlet, RouterLinkWithHref, RouterLinkActive, ProfileBadge],
   template: `
   
 <div class="mt-[6rem] grid grid-cols-12">
@@ -12,46 +14,28 @@ import { INavigation } from '@core/models/navigation';
     <!-- left side -->
     <div class="col-start-3 col-end-5">
         <!-- Image and name -->
-        <div class="flex justify-center items-center flex-col my-4">
-            <button
-                type="button"
-                class="cursor-pointer group flex flex-col items-center"
-                (click)="changeProfilePic()"
-                aria-label="Change profile picture">
-                <!-- Profile Picture Container -->
-                <div class="relative">
-                    <!-- Profile Picture -->
-                    <div
-                        class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex justify-center items-center border-4 border-white shadow-md">
-                        <img
-                            src="https://via.placeholder.com/150"
-                            alt="Profile picture"
-                            class="w-full h-full object-cover"/>
+        @if (profile(); as p) {
+            <app-profile-badge
+                [imageUrl]="avatarUrl()"
+                [isChangeable]="true"
+                [userEmail]="p.email"
+                (changePicture)="fileInput.click()"
+                [userName]="fullName()">
+            </app-profile-badge>
+            <input
+                #fileInput
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                class="hidden"
+                (change)="onFileSelected($event)">
 
-                        <!-- Camera Icon-->
-                        <div
-                            class="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-orange-500 text-white flex justify-center items-center border-4 border-white shadow-md group-hover:bg-orange-600 transition-colors duration-200">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="w-5 h-5">
-                                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
-                                <circle cx="12" cy="13" r="3"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </button>
-            <!-- Username -->
-            <span class="mt-3 text-base font-bold">
-                {{ userName }}
-            </span>
-        </div>
+            @if (isUploading()) {
+                <p class="text-xs text-gray-500 text-center">Uploading...</p>
+            } @else if (avatarState()) {
+                <p class="text-xs text-red-500 text-center">{{ avatarState() }}</p>
+            }
+        }
+        
         <ul class="font-medium">
             @for (item of nav; track item.name) {
                 <li routerLinkActive="active-link" 
@@ -80,10 +64,30 @@ import { INavigation } from '@core/models/navigation';
   styles: ``,
 })
 export class UserProfile {
-    userName = 'Alex Andrei'
-    protected changeProfilePic () {
-        console.log('Attempted to change profile pic')
+    private profileService = inject(ProfileService);
+    protected profile = this.profileService.profile;
+    protected readonly fullName = this.profileService.fullName;
+    protected readonly avatarUrl = computed(() => this.profileService.avatarUrl());
+    protected avatarState = signal<string | null>(null);
+    protected isUploading = signal(false);
+
+    protected async onFileSelected(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
+
+        this.isUploading.set(true);
+        this.avatarState.set(null);
+        try {
+            await this.profileService.changeAvatar(file);
+        } catch (e: any) {
+            this.avatarState.set(e.message);
+        } finally {
+            this.isUploading.set(false);
+            input.value = ''; // lets you pick the same file again
+        }
     }
+
 
     protected nav: INavigation[] = [
         {
