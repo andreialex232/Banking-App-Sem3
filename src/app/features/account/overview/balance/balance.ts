@@ -12,11 +12,12 @@ import { Button } from '@shared/ui/button/button';
 import { FormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { AmountField } from '@shared/forms/amount-field/amount-field';
+import { SendBalance } from './send-balance/send-balance';
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-balance',
-  imports: [Button, FormsModule, DecimalPipe, CurrencyConverter, AmountField],
+  imports: [Button, FormsModule, DecimalPipe, CurrencyConverter, AmountField, SendBalance],
   templateUrl: `./balance.html`,
   styles: ``,
 })
