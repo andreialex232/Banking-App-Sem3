@@ -25,9 +25,8 @@ html, body {
 @theme {
     /* Fonts */
     /* --font-quicksand: "Quicksand", sans-serif;  */
-/*     --font-dm: "Kumbh Sans", sans-serif;
-    --font-sans: "DM Sans", sans-serif;
- */
+    --font-dm: "Kumbh Sans", sans-serif;
+
 
     /* Colors */
     --color-app-bg: #f8f7f4; /* Page background, cards */
