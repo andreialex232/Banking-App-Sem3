@@ -2,13 +2,14 @@ import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '@core/services/auth/auth.service';
 import { Button } from '@shared/ui/button/button';
+import { RouterLink } from '@angular/router';
 import { InputField } from '../components/input-field/input-field';
 import { scrollToFirstInvalidField, getAppwriteError } from '@shared/utils/form.utils';
 import { NavigationService } from '@core/services/navigation.service';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, Button, InputField],
+  imports: [ReactiveFormsModule, Button, InputField, RouterLink],
   templateUrl: './login.html',
   styles: ``,
 })
