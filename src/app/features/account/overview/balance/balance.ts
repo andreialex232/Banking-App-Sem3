@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, computed, DestroyRef, effect, inject, OnInit, signal, ViewChild, ElementRef } from '@angular/core';
+import { AfterViewInit, Component, computed, DestroyRef, effect, inject, OnInit, signal, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CurrencyService } from '@core/services/bank-account/currency-converter.service';
 import { BankAccount } from '@core/models/bank-account/bank-account.models';
@@ -21,7 +21,7 @@ Chart.register(...registerables);
   templateUrl: `./balance.html`,
   styles: ``,
 })
-export class Balance implements OnInit, AfterViewInit {
+export class Balance implements OnInit, AfterViewInit, OnDestroy {
     private route = inject(ActivatedRoute);
     private authService = inject(AuthService);
     private bankAccountService = inject(BankAccountService);
@@ -95,6 +95,10 @@ export class Balance implements OnInit, AfterViewInit {
             this.createChart();
         }
     };
+
+    ngOnDestroy(): void {
+        this.chart.destroy();
+    }
 
     async addFunds() {
         await this.runTransaction((account, curr, amount) =>
