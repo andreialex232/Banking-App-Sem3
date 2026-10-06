@@ -8,6 +8,7 @@
                 
                 @let email = this.loginForm.controls.email;
                 <app-input-field
+                    [autocomplete]="'email'"
                     [control]="email"
                     colSpan="col-span-4"
                     label="Email Address"
@@ -25,6 +26,7 @@
                 
                 @let password = this.loginForm.controls.password;
                 <app-input-field
+                    [autocomplete]="'password'"
                     label="Password"
                     colSpan="col-span-4"
                     id="password"

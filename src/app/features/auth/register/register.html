@@ -13,7 +13,7 @@
                         id="first-name"
                         [control]="firstName"
                         label="First name"
-                        autocomplete="given-name">
+                        [autocomplete]="'given-name'">
                         <ng-container errors>
                             @if (firstName.hasError('required')) {
                                 First name is required
@@ -30,7 +30,7 @@
                         id="last-name"
                         [control]="lastName"
                         label="Last name"
-                        autocomplete="family-name">
+                        [autocomplete]="'family-name'">
                         <ng-container errors>
                             @if (lastName.hasError('required')) {
                                 Last name is required
@@ -44,6 +44,7 @@
                     <!-- Email -->
                     @let email = this.registerForm.controls.email;
                     <app-input-field
+                        [autocomplete]="'email'"
                         colSpan="sm:col-span-4"
                         id="email"
                         [control]="email"
@@ -61,6 +62,7 @@
                     <!-- Password -->
                     @let password = this.registerForm.controls.password;
                     <app-input-field
+                        [autocomplete]="'new-password'"
                         id="password"
                         [control]="password"
                         label="Password"
@@ -82,7 +84,6 @@
                         id="confirm-password"
                         [control]="confirmPassword"
                         label="Confirm Password"
-                        autocomplete="password"
                         type="password">
                         <ng-container errors>
                             @if (confirmPassword.hasError('required')) {
@@ -136,6 +137,7 @@
                     <!-- Postal code -->
                     @let postalCode = this.registerForm.controls.postalCode;
                     <app-input-field
+                        [autocomplete]="'postal-code'"
                         colSpan="sm:col-span-2"
                         id="postal-code"
                         [control]="postalCode"
@@ -153,6 +155,7 @@
                     <!-- Street -->
                     @let street = this.registerForm.controls.street;
                     <app-input-field
+                        [autocomplete]="'street-address'"
                         colSpan="col-span-full"
                         id="street-address"
                         [control]="street"
