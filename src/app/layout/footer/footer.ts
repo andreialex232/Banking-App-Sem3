@@ -13,7 +13,7 @@ import { RouterLink } from "@angular/router";
         <h3 class="font-dm mb-2 font-semibold text-lg">{{ section.title }}</h3>
         <ul>
             @for (item of section.items; track item.name) {
-            <li [class.pb-1]="!$last" class="font-quicksand">
+            <li [class.pb-1]="!$last">
                 <a class="hover:opacity-70" [routerLink]="item.href">{{ item.name }}</a>
             </li>
             }
@@ -22,7 +22,7 @@ import { RouterLink } from "@angular/router";
     }
     </div>
 
-    <div class="mt-10 pt-10 col-start-2 col-end-12 text-center text-sm border-solid border-t-[1px] border-white font-quicksand">
+    <div class="mt-10 pt-10 col-start-2 col-end-12 text-center text-sm border-solid border-t-[1px] border-white">
         <p>&copy; Your Bank reserves all rights. Read our Cookie Policy and Privacy Policy.</p>
         <p>Your Bank A/S is under supervision of The Danish Financial Supervisory Authority and is a 100% owned subsidiary of Your Bank A/S. Users who have registered in the app are subject to the applicable terms and conditions found in Your Bank A/S.</p>
     </div>

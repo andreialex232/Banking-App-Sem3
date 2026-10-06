@@ -68,7 +68,7 @@ interface IPlan {
                 </a>
 
               @if (plan.includesText) {
-                <p class="my-4 font-quicksand mb-3 text-xs font-semibold">
+                <p class="my-4 mb-3 text-xs font-semibold">
                   {{ plan.includesText }}
                 </p>
               }
@@ -93,7 +93,7 @@ interface IPlan {
                         />
                       </svg>
                     </div>
-                    <span class="font-quicksand text-xs">
+                    <span class="text-xs">
                       {{ feature }}
                     </span>
                   </li>

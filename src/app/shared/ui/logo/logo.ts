@@ -5,7 +5,7 @@ import { Component, Input } from '@angular/core';
   imports: [],
   template: `
     <div 
-        class="font-quicksand flex justify-center items-center" 
+        class="flex justify-center items-center" 
         [class.flex-col]="variant === 'vertical'">
         <img src="assets/svgs/bank-orange.svg" alt="Bank Logo">
         <div 
@@ -21,6 +21,6 @@ import { Component, Input } from '@angular/core';
 })
 export class Logo {
     @Input({required: true}) variant!: "vertical" | "horizontal"
-    @Input({required: true}) bankSize!: "text-sm" | "text-md" | "text-lg" | "text-xl" | "text-2xl"
-    @Input({required: true}) yourSize!: "text-sm" | "text-md" | "text-lg" | "text-xl" | "text-2xl"
+    @Input({required: true}) bankSize!: "text-sm" | "text-base" | "text-lg" | "text-xl" | "text-2xl"
+    @Input({required: true}) yourSize!: "text-sm" | "text-base" | "text-lg" | "text-xl" | "text-2xl"
 }
