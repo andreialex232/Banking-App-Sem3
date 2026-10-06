@@ -42,28 +42,25 @@ export class BankAccountService {
         const account = result.rows.length > 0 ? (result.rows[0] as unknown as BankAccount) : null;
         this.bankAccount.set(account);
         return account;
-    };
+    }
 
     addCurrency(accountRowId: string, currency: SupportedCurrency) {
+        if (this.requireAccount()[currency] !== null) {
+            throw new Error(`${currency.toUpperCase()} account already exists`);
+        }
         return this.setCurrencyAmount(accountRowId, currency, 0);
     }
 
     removeCurrency(accountRowId: string, currency: SupportedCurrency) {
-        if(currency === 'eur') {
-            throw new Error('Cannot remove the base EUR account.');
-        }
-        
+        if(currency === 'eur') throw new Error('Cannot remove the base EUR account.');
+        /* const balance = this.requireBalance(currency);
+        if (balance > 0) throw new Error(`Withdraw or transfer your ${currency.toUpperCase()} balance first`); */
         return this.setCurrencyAmount(accountRowId, currency, null);
     }
 
     async deposit(accountRowId: string, currency: SupportedCurrency, amount: number) {
-        if (amount <= 0) throw new Error('Amount must be positive');
-
-        const account = this.bankAccount();
-        if (!account) throw new Error('No account loaded');
-
-        const currentAmount = account[currency];
-        if (currentAmount === null) throw new Error(`${currency.toUpperCase()} account has not been added yet`);
+        this.assertPositive(amount);
+        const currentAmount = this.requireBalance(currency);
 
         let amountEur: number;
         try {
@@ -86,7 +83,7 @@ export class BankAccountService {
         });
     }
 
-    async setCurrencyAmount(accountRowId: string, currency: SupportedCurrency, amount: number | null) {
+    private async setCurrencyAmount(accountRowId: string, currency: SupportedCurrency, amount: number | null) {
         await this.updateAccount(accountRowId, { [currency]: amount });
     }
 
@@ -103,29 +100,20 @@ export class BankAccountService {
     }
 
     async withdraw(accountRowId: string, currency: SupportedCurrency, amount: number) {
-        if (amount <= 0) throw new Error('Amount must be positive');
+        this.assertPositive(amount);
+        const currentAmount = this.requireBalance(currency);
 
-        const account = this.bankAccount();
-        if (!account) throw new Error('No account loaded');
-
-        const currentAmount = account[currency];
-        if (currentAmount === null) throw new Error(`${currency.toUpperCase()} account has not been added yet`);
         if (amount > currentAmount) throw new Error('Insufficient funds');
 
         await this.setCurrencyAmount(accountRowId, currency, this.round2(currentAmount - amount));
     }
 
     async transfer(rowId: string, from: SupportedCurrency, to: SupportedCurrency, amount: number) {
-        if (amount <= 0) throw new Error('Amount must be positive');
+        this.assertPositive(amount);
         if (from === to) throw new Error('Choose two different currencies');
 
-        const account = this.bankAccount();
-        if (!account) throw new Error('No account loaded');
-
-        const fromAmount = account[from];
-        const toAmount = account[to];
-        if (fromAmount === null) throw new Error(`${from.toUpperCase()} account has not been added yet`);
-        if (toAmount === null) throw new Error(`${to.toUpperCase()} account has not been added yet`);
+        const fromAmount = this.requireBalance(from);
+        const toAmount = this.requireBalance(to);
         if (amount > fromAmount) throw new Error('Insufficient funds');
         
         let converted: number;
@@ -144,28 +132,12 @@ export class BankAccountService {
     }
 
 
-    private async findUserIdByEmail(email: string): Promise<string> {
-        const result = await this.appwrite.tablesDB.listRows({
-            databaseId: environment.appwriteDatabaseId,
-            tableId: environment.appwriteProfilesTableId,
-            queries: [Query.equal('email', email.trim().toLowerCase())]
-        });
-
-        const profile = result.rows[0];
-        if (!profile) throw new Error('Recipient not found');
-
-        return profile['userId'] as string;
-    }
-
     async send(accountRowId: string, toUserId: string, currency: SupportedCurrency, amount: number) {
-        if (amount <= 0) throw new Error('Amount must be positive');
-
-        const account = this.bankAccount();
-        if (!account) throw new Error('No account loaded');
+        this.assertPositive(amount);
+        const account = this.requireAccount();
         if (toUserId === account.userId) throw new Error('Cannot send money to yourself');
 
-        const currentAmount = account[currency];
-        if (currentAmount === null) throw new Error(`${currency.toUpperCase()} account has not been added yet`);
+        const currentAmount = this.requireBalance(currency);
         if (amount > currentAmount) throw new Error('Insufficient funds');
 
         const res = await this.appwrite.tablesDB.listRows({
@@ -190,12 +162,29 @@ export class BankAccountService {
                 data: { [currency]: this.round2(receiverAmount + amount) }
             });
         } catch {
-            await this.setCurrencyAmount(accountRowId, currency, currentAmount);
+            const live = this.requireBalance(currency);
+            await this.setCurrencyAmount(accountRowId, currency, this.round2(live + amount));
             throw new Error('Transfer failed, you were refunded');
         }
     }
 
     private round2(value: number): number {
         return Math.round(value * 100) / 100;
+    }
+
+    private requireAccount(): BankAccount {
+        const account = this.bankAccount();
+        if (!account) throw new Error('No account loaded');
+        return account;
+    }
+
+    private requireBalance(currency: SupportedCurrency): number {
+        const balance = this.requireAccount()[currency];
+        if (balance === null) throw new Error(`${currency.toUpperCase()} account has not been added yet`);
+        return balance;
+    }
+
+    private assertPositive(amount: number): void {
+        if (amount <= 0) throw new Error('Amount must be positive');
     }
 }
