@@ -26,7 +26,11 @@ export class Register implements OnInit {
     protected otherError = signal<string | null>(null)
 
     ngOnInit(): void {
-        const { country, postalCode } = this.registerForm.controls;
+        const { country, postalCode, password, confirmPassword } = this.registerForm.controls;
+
+        password.valueChanges
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => confirmPassword.updateValueAndValidity())
         
         country?.valueChanges
             .pipe(takeUntilDestroyed(this.destroyRef))
