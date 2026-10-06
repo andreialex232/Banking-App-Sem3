@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { AppwriteService } from '@core/services/appwrite.service';
-import { ID, Permission, Role, Models } from 'appwrite';
+import { ID, Permission, Role, Models, Query } from 'appwrite';
 import { environment } from '@/environments/environment.development';
 import { BankAccountService } from '../bank-account/bank-account.service';
 import { ProfileService } from '../profile.service';
@@ -67,27 +67,64 @@ export class AuthService {
         return user.$id;
     }
 
-    async logIn(email: string, password: string): Promise<void> {
+    async logIn(email: string, password: string, repair = true): Promise<void> {
         try {
             await this.appwrite.account.deleteSession({sessionId: 'current'})
-        } catch(err) {
-            
-        }
+        } catch(err) {}
         this.currentUser.set(null);
         this.bankAccountService.bankAccount.set(null);
         await this.appwrite.account.createEmailPasswordSession({
             email,
             password
         });
+        if (repair) await this.ensureRowsExist();
         await this.getCurrentUser(true);
     }
+
+    private async ensureRowsExist() {
+        try {
+            const user = await this.appwrite.account.get();
+            const query = [Query.equal('userId', user.$id), Query.limit(1)];
+
+            const [profiles, banks] = await Promise.all([
+                this.appwrite.tablesDB.listRows({
+                    databaseId: environment.appwriteDatabaseId,
+                    tableId: environment.appwriteProfilesTableId,
+                    queries: query,
+                }),
+                this.appwrite.tablesDB.listRows({
+                    databaseId: environment.appwriteDatabaseId,
+                    tableId: environment.appwriteBankAccountsId,
+                    queries: query,
+                }),
+            ]);
+
+            if (profiles.total === 0) {
+                const [firstName, ...rest] = user.name.split(' ');
+                await this.insertRowsUserProfile({
+                    email: user.email,
+                    firstName,
+                    lastName: rest.join(' '),
+                    country: '',
+                    street: '',
+                    postalCode: '',
+                }, user.$id);
+            }
+            if (banks.total === 0) {
+                await this.insertRowsBankAccount(user.$id);
+            }
+        } catch (err) {
+            console.error('Could not verify account rows:', err);
+        }
+    }
+
 
     async insertRows(data: RegisterPayload, userId: string) {
         await this.insertRowsUserProfile(data, userId);
         await this.insertRowsBankAccount(userId);
     }
 
-    async insertRowsUserProfile(data:RegisterPayload, userId: string) {
+    async insertRowsUserProfile(data: Omit<RegisterPayload, 'password'>, userId: string) {
         await this.appwrite.tablesDB.createRow({
             databaseId: environment.appwriteDatabaseId,
             tableId: environment.appwriteProfilesTableId,
@@ -133,7 +170,7 @@ export class AuthService {
 
     async register(data: RegisterPayload) {
         const accountId = await this.createAccount(data);
-        await this.logIn(data.email, data.password);
+        await this.logIn(data.email, data.password, false);
         try {
             await this.insertRows(data, accountId);
             await this.loadUserData(accountId);
