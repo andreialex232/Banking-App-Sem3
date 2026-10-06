@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { AppwriteService } from '@core/services/appwrite.service';
 import { ID, Permission, Role, Models, Query } from 'appwrite';
-import { environment } from '@/environments/environment.development';
+import { environment } from '@/environments/environment';
 import { BankAccountService } from '../bank-account/bank-account.service';
 import { ProfileService } from '../profile.service';
 

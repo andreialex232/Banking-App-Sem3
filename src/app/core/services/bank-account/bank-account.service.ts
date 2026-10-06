@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { AppwriteService } from '@core/services/appwrite.service';
 import { Query } from 'appwrite';
-import { environment } from '@/environments/environment.development';
+import { environment } from '@/environments/environment';
 import { SupportedCurrency } from '@core/models/currency/currency.models';
 import { BankAccount } from '@core/models/bank-account/bank-account.models';
 import { CurrencyService } from './currency-converter.service';

@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Models, Query } from 'appwrite';
 import { AppwriteService } from '@core/services/appwrite.service';
 import { AvatarsService } from './avatars.service';
-import { environment } from '@/environments/environment.development';
+import { environment } from '@/environments/environment';
 
 export interface ProfileRow extends Models.Row {
     userId: string;

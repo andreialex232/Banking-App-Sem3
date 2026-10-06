@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { ID, Permission, Role } from 'appwrite';
 import { AppwriteService } from '@core/services/appwrite.service';
-import { environment } from '@/environments/environment.development';
+import { environment } from '@/environments/environment';
 
 @Injectable({
   providedIn: 'root',

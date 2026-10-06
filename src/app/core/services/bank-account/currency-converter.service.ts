@@ -3,7 +3,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Observable, tap, map, of } from 'rxjs';
 import { SupportedCurrency, currencyLocaleMap } from '@core/models/currency/currency.models';
 import { AppwriteService } from '../appwrite.service';
-import { environment } from '@/environments/environment.development';
+import { environment } from '@/environments/environment';
 
 interface FrankfurterResponse {
     base: string;

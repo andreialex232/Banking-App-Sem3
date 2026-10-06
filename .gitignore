@@ -45,13 +45,6 @@ Thumbs.db
 *.swp
 *.swo
 
-# Local environment overrides & secrets
-.env
-*.env.local
-.env.*.local
-src/environments/environment.development.ts
-src/environments/environment.ts
-
 # C# / .NET Build Outputs
 [Bb]in/
 [Oo]bj/
