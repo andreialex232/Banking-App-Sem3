@@ -50,16 +50,12 @@ import { Button } from '@shared/ui/button/button';
   `,
   styles: ``,
 })
-export class Header implements OnInit {
+export class Header {
     private auth = inject(AuthService);
     private router = inject(Router);
 
     protected currentUser = this.auth.currentUser;
     protected isLogouting = signal(false);
-
-    ngOnInit(): void {
-        /* this.auth.getCurrentUser(); */
-    }
 
     protected async logOut() {
         try {

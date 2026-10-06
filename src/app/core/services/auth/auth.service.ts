@@ -154,4 +154,11 @@ export class AuthService {
             console.error('Could not load user data:', err);
         }
     }
+
+    async init(): Promise<void> {
+        await Promise.race([
+            this.getCurrentUser(),
+            new Promise<void>(resolve => setTimeout(resolve, 5000))
+        ])
+    }
 }
