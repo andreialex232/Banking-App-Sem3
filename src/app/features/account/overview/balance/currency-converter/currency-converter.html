@@ -13,7 +13,7 @@
       (ngSubmit)="convert()"
       novalidate>
  
-    <app-amount-field id="amount" label="Amount" placeholder="0" [control]="amount">
+    <app-amount-field [id]="'convert-amount'" label="Amount" placeholder="0" [control]="amount">
         <ng-container errors>
             @if (amount.hasError('required')) { Enter an amount. }
             @else if (amount.hasError('min')) { Amount must be at least 0.01. }
