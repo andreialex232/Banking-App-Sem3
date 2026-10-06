@@ -8,6 +8,7 @@ import { Button } from '@shared/ui/button/button';
 import { AmountField } from '@shared/forms/amount-field/amount-field';
 import { ExchangeService, Rate } from '@core/services/bank-account/exchange.service';
 import { BankAccountService } from '@core/services/bank-account/bank-account.service';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-currency-converter',
@@ -22,7 +23,14 @@ export class CurrencyConverter {
     private bankAccountService = inject(BankAccountService);
 
     readonly currencies: SupportedCurrency[] = SUPPORTED_CURRENCIES;
-    rates = toSignal(this.exchangeService.getRateList(), { initialValue: [] as Rate[] });
+    rates = toSignal(
+        this.exchangeService.getRateList()
+            .pipe(catchError(err => {
+                console.error('Failed to load rates', err);
+                return of([] as Rate[]);
+            })),
+            {initialValue: [] as Rate[]}
+    )
 
     form = new FormGroup({
         amount: new FormControl<number | null>(null, {
