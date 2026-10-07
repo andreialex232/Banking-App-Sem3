@@ -9,6 +9,7 @@ import { ExchangeRateService } from '@core/services/bank-account/exchange-rate.s
 import { Rate } from '@core/models/bank-account/exchange-rate.models';
 import { BankAccountService } from '@core/services/bank-account/bank-account.service';
 import { catchError, of } from 'rxjs';
+import { formatMoney } from '@shared/utils/format-money';
 
 @Component({
   selector: 'app-currency-converter',
@@ -80,7 +81,7 @@ export class CurrencyConverter {
             const account = this.bankAccountService.bankAccount();
             if (!account) throw new Error('No account loaded');
             const converted = await this.bankAccountService.transfer(from, to, amount!);
-            this.result.set(`${this.exchangeRates.format(amount!, from)} = ${this.exchangeRates.format(converted, to)}`);           
+            this.result.set(`${formatMoney(amount!, from)} = ${formatMoney(converted, to)}`);           
         } catch(err) {
             this.apiError.set(err instanceof Error ? err.message : 'Something went wrong. Try later.');
         } finally {

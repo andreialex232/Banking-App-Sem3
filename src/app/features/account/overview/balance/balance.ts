@@ -1,6 +1,5 @@
 import { AfterViewInit, Component, computed, DestroyRef, effect, inject, OnInit, signal, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ExchangeRateService } from '@core/services/bank-account/exchange-rate.service';
 import { BankAccount } from '@core/models/bank-account/bank-account.models';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SupportedCurrency } from '@core/models/currency/currency.models';
@@ -13,6 +12,7 @@ import { FormsModule, FormGroup, FormControl, Validators } from '@angular/forms'
 import { DecimalPipe } from '@angular/common';
 import { AmountField } from '@shared/forms/amount-field/amount-field';
 import { SendBalance } from './send-balance/send-balance';
+import { formatMoney } from '@shared/utils/format-money';
 Chart.register(...registerables);
 
 @Component({
@@ -26,7 +26,6 @@ export class Balance implements OnInit, AfterViewInit, OnDestroy {
     private authService = inject(AuthService);
     private bankAccountService = inject(BankAccountService);
     private destroyRef = inject(DestroyRef);
-    private exchangeRates = inject(ExchangeRateService);
     private router = inject(Router);
 
     form = new FormGroup({
@@ -194,7 +193,7 @@ export class Balance implements OnInit, AfterViewInit, OnDestroy {
             ctx.textBaseline = 'middle';
             ctx.fillStyle = '#000';
 
-            const text = this.exchangeRates.format(this.balance(), this.currency()!);
+            const text = formatMoney(this.balance(), this.currency()!);
             ctx.fillText(text, width / 2, height / 2);
             ctx.restore();
         }

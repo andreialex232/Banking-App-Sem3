@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, of, map, tap } from 'rxjs';
-import { SupportedCurrency, currencyLocaleMap, SUPPORTED_CURRENCIES } from '@core/models/currency/currency.models';
+import { SupportedCurrency, SUPPORTED_CURRENCIES } from '@core/models/currency/currency.models';
 import { FrankfurterResponse, Rate } from '@core/models/bank-account/exchange-rate.models';
 
 const FRANKFURTER_URL = 'https://api.frankfurter.dev/v1';
@@ -97,20 +97,5 @@ export class ExchangeRateService {
         const lastRate = data.rates[dates[dates.length - 1]][currency];
 
         return ((lastRate - firstRate) / firstRate) * 100;
-    }
-
-    format(amount: number, currency: SupportedCurrency): string {
-        const locale = currencyLocaleMap[currency];
-        const parts = new Intl.NumberFormat(locale, {
-            style: 'currency',
-            currency,
-            minimumFractionDigits: 0,
-        }).formatToParts(amount);
-
-        return parts
-            .map((part) => (part.type === 'currency' ? ` ${part.value} ` : part.value))
-            .join('')
-            .trim()
-            .replace(/\s+/g, ' ');
     }
 }
