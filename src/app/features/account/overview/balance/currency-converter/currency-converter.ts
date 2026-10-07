@@ -2,11 +2,11 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SupportedCurrency, SUPPORTED_CURRENCIES } from '@core/models/currency/currency.models';
-import { CurrencyService } from '@core/services/bank-account/currency-converter.service';
 import { differentCurrencies } from './validators/different-currencies.validator';
 import { Button } from '@shared/ui/button/button';
 import { AmountField } from '@shared/forms/amount-field/amount-field';
-import { ExchangeService, Rate } from '@core/services/bank-account/exchange.service';
+import { ExchangeRateService } from '@core/services/bank-account/exchange-rate.service';
+import { Rate } from '@core/models/bank-account/exchange-rate.models';
 import { BankAccountService } from '@core/services/bank-account/bank-account.service';
 import { catchError, of } from 'rxjs';
 
@@ -17,14 +17,13 @@ import { catchError, of } from 'rxjs';
   styles: ``
 })
 export class CurrencyConverter {
-    private cc = inject(CurrencyService);
     private destroyRef = inject(DestroyRef);
-    private exchangeService = inject(ExchangeService);
+    private exchangeRates = inject(ExchangeRateService);
     private bankAccountService = inject(BankAccountService);
 
     readonly currencies: SupportedCurrency[] = SUPPORTED_CURRENCIES;
     rates = toSignal(
-        this.exchangeService.getRateList()
+        this.exchangeRates.getRateList()
             .pipe(catchError(err => {
                 console.error('Failed to load rates', err);
                 return of([] as Rate[]);
@@ -81,7 +80,7 @@ export class CurrencyConverter {
             const account = this.bankAccountService.bankAccount();
             if (!account) throw new Error('No account loaded');
             const converted = await this.bankAccountService.transfer(from, to, amount!);
-            this.result.set(`${this.cc.format(amount!, from)} = ${this.cc.format(converted, to)}`);            
+            this.result.set(`${this.exchangeRates.format(amount!, from)} = ${this.exchangeRates.format(converted, to)}`);           
         } catch(err) {
             this.apiError.set(err instanceof Error ? err.message : 'Something went wrong. Try later.');
         } finally {

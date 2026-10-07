@@ -4,7 +4,7 @@ import { Query } from 'appwrite';
 import { environment } from '@/environments/environment';
 import { SupportedCurrency } from '@core/models/currency/currency.models';
 import { BankAccount } from '@core/models/bank-account/bank-account.models';
-import { CurrencyService } from './currency-converter.service';
+import { ExchangeRateService } from '@core/services/bank-account/exchange-rate.service';
 import { dailyDepositLimitFor } from '@core/models/bank-account/plans.models';
 import { firstValueFrom } from 'rxjs';
 
@@ -13,7 +13,7 @@ import { firstValueFrom } from 'rxjs';
 })
 export class BankAccountService {
     private appwrite = inject(AppwriteService);
-    private cc = inject(CurrencyService);
+    private exchangeRates = inject(ExchangeRateService);
 
     bankAccount = signal<BankAccount | null>(null);
     dailyLimit = computed(() => dailyDepositLimitFor(this.bankAccount()?.plan));
@@ -63,7 +63,7 @@ export class BankAccountService {
 
         let amountEur: number;
         try {
-            amountEur = await firstValueFrom(this.cc.toEur(amount, currency));
+            amountEur = await firstValueFrom(this.exchangeRates.toEur(amount, currency));
         } catch {
             throw new Error('Could not fetch the exchange rate. Try again later.');
         }
@@ -117,7 +117,7 @@ export class BankAccountService {
         
         let converted: number;
         try {
-            converted = await firstValueFrom(this.cc.convert(amount, from, to));
+            converted = await firstValueFrom(this.exchangeRates.convert(amount, from, to));
         } catch {
             throw new Error('Could not fetch the exchange rate. Try again later.');
         }
