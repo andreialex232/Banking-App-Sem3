@@ -1,4 +1,4 @@
-export type Plan = 'free' | 'premium'
+import { Plan } from "./plans.models";
 
 export interface BankAccount {
     $id: string;

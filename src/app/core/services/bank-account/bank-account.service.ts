@@ -5,7 +5,7 @@ import { environment } from '@/environments/environment';
 import { SupportedCurrency } from '@core/models/currency/currency.models';
 import { BankAccount } from '@core/models/bank-account/bank-account.models';
 import { CurrencyService } from './currency-converter.service';
-import { PlansService } from './plans.service';
+import { dailyDepositLimitFor } from '@core/models/bank-account/plans.models';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({
@@ -13,11 +13,10 @@ import { firstValueFrom } from 'rxjs';
 })
 export class BankAccountService {
     private appwrite = inject(AppwriteService);
-    private plans = inject(PlansService);
     private cc = inject(CurrencyService);
 
     bankAccount = signal<BankAccount | null>(null);
-    dailyLimit = computed(() => this.plans.dailyDepositLimitFor(this.bankAccount()?.plan));
+    dailyLimit = computed(() => dailyDepositLimitFor(this.bankAccount()?.plan));
     depositedToday = computed(() => {
         const a = this.bankAccount();
         return a?.dailyDepositDate === this.today() ? (a.dailyDepositedEur ?? 0) : 0;
