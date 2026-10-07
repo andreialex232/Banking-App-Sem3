@@ -1,11 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, of, map, tap } from 'rxjs';
-import { SupportedCurrency, currencyLocaleMap, CONVERTABLE_CURRENCIES } from '@core/models/currency/currency.models';
+import { SupportedCurrency, currencyLocaleMap, SUPPORTED_CURRENCIES } from '@core/models/currency/currency.models';
 import { FrankfurterResponse, Rate } from '@core/models/bank-account/exchange-rate.models';
 
 const FRANKFURTER_URL = 'https://api.frankfurter.dev/v1';
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const OTHER_CURRENCIES = SUPPORTED_CURRENCIES
+    .filter((currency) => currency !== 'eur')
+    .map((currency) => currency.toUpperCase());
 
 @Injectable({
   providedIn: 'root',
@@ -30,7 +33,7 @@ export class ExchangeRateService {
 
     const params = new HttpParams()
         .set('base', 'EUR')
-        .set('symbols', CONVERTABLE_CURRENCIES.join(','));
+        .set('symbols', OTHER_CURRENCIES.join(','));
 
     return this.http
         .get<FrankfurterResponse>(`${FRANKFURTER_URL}/${startDate}..`, { params })
@@ -78,7 +81,7 @@ export class ExchangeRateService {
         map((data) => {
             const latestRates = this.getLatestRates(data);
 
-            return CONVERTABLE_CURRENCIES.map((code) => ({
+            return OTHER_CURRENCIES.map((code) => ({
                 code,
                 rate: latestRates[code],
                 change: Math.round(this.getChangePercent(data, code) * 100) / 100,
