@@ -44,21 +44,21 @@ export class BankAccountService {
         return account;
     }
 
-    addCurrency(accountRowId: string, currency: SupportedCurrency) {
+    addCurrency(currency: SupportedCurrency) {
         if (this.requireAccount()[currency] !== null) {
             throw new Error(`${currency.toUpperCase()} account already exists`);
         }
-        return this.setCurrencyAmount(accountRowId, currency, 0);
+        return this.setCurrencyAmount(currency, 0);
     }
 
-    removeCurrency(accountRowId: string, currency: SupportedCurrency) {
+    removeCurrency(currency: SupportedCurrency) {
         if(currency === 'eur') throw new Error('Cannot remove the base EUR account.');
         /* const balance = this.requireBalance(currency);
         if (balance > 0) throw new Error(`Withdraw or transfer your ${currency.toUpperCase()} balance first`); */
-        return this.setCurrencyAmount(accountRowId, currency, null);
+        return this.setCurrencyAmount(currency, null);
     }
 
-    async deposit(accountRowId: string, currency: SupportedCurrency, amount: number) {
+    async deposit(currency: SupportedCurrency, amount: number) {
         this.assertPositive(amount);
         const currentAmount = this.requireBalance(currency);
 
@@ -76,39 +76,39 @@ export class BankAccountService {
             throw new Error(`Daily deposit limit reached. You can still deposit ${left.toFixed(2)} EUR today.`);
         }
 
-        await this.updateAccount(accountRowId, {
+        await this.updateAccount({
             [currency]: this.round2(currentAmount + amount),
             dailyDepositedEur: this.round2(usedToday + amountEur),
             dailyDepositDate: this.today(),
         });
     }
 
-    private async setCurrencyAmount(accountRowId: string, currency: SupportedCurrency, amount: number | null) {
-        await this.updateAccount(accountRowId, { [currency]: amount });
+    private async setCurrencyAmount(currency: SupportedCurrency, amount: number | null) {
+        await this.updateAccount({[currency]: amount });
     }
 
-    private async updateAccount(rowId: string, data: Partial<BankAccount>) {
+    private async updateAccount(data: Partial<BankAccount>) {
+        const account = this.requireAccount();
+
         await this.appwrite.tablesDB.updateRow({
             databaseId: environment.appwriteDatabaseId,
             tableId: environment.appwriteBankAccountsId,
-            rowId,
-            data
+            rowId: account.$id,
+            data,
         })
-
-        const current = this.bankAccount();
-        if (current) this.bankAccount.set({ ...current, ...data });
+        this.bankAccount.update(a => a && {... a, ...data});
     }
 
-    async withdraw(accountRowId: string, currency: SupportedCurrency, amount: number) {
+    async withdraw(currency: SupportedCurrency, amount: number) {
         this.assertPositive(amount);
         const currentAmount = this.requireBalance(currency);
 
         if (amount > currentAmount) throw new Error('Insufficient funds');
 
-        await this.setCurrencyAmount(accountRowId, currency, this.round2(currentAmount - amount));
+        await this.setCurrencyAmount(currency, this.round2(currentAmount - amount));
     }
 
-    async transfer(rowId: string, from: SupportedCurrency, to: SupportedCurrency, amount: number) {
+    async transfer(from: SupportedCurrency, to: SupportedCurrency, amount: number) {
         this.assertPositive(amount);
         if (from === to) throw new Error('Choose two different currencies');
 
@@ -123,7 +123,7 @@ export class BankAccountService {
             throw new Error('Could not fetch the exchange rate. Try again later.');
         }
 
-        await this.updateAccount(rowId, {
+        await this.updateAccount({
             [from]: this.round2(fromAmount - amount),
             [to]: this.round2(toAmount + converted)
         });
@@ -132,7 +132,7 @@ export class BankAccountService {
     }
 
 
-    async send(accountRowId: string, toUserId: string, currency: SupportedCurrency, amount: number) {
+    async send(toUserId: string, currency: SupportedCurrency, amount: number) {
         this.assertPositive(amount);
         const account = this.requireAccount();
         if (toUserId === account.userId) throw new Error('Cannot send money to yourself');
@@ -152,7 +152,7 @@ export class BankAccountService {
         const receiverAmount = receiver[currency] as number | null;
         if (receiverAmount === null) throw new Error(`Recipient has no ${currency.toUpperCase()} account`);
 
-        await this.withdraw(accountRowId, currency, amount);
+        await this.withdraw(currency, amount);
 
         try {
             await this.appwrite.tablesDB.updateRow({
@@ -163,7 +163,7 @@ export class BankAccountService {
             });
         } catch {
             const live = this.requireBalance(currency);
-            await this.setCurrencyAmount(accountRowId, currency, this.round2(live + amount));
+            await this.setCurrencyAmount(currency, this.round2(live + amount));
             throw new Error('Transfer failed, you were refunded');
         }
     }

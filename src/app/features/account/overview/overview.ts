@@ -60,7 +60,7 @@ export class Overview implements OnInit {
 
         this.isAdding.set(true);
         try {
-            await this.bankAcc.addCurrency(account.$id, currency);
+            await this.bankAcc.addCurrency(currency);
             this.selectedCurrency.set(null);
             this.isMenuOpen.set(false);
         } catch(err) {

@@ -88,7 +88,7 @@ export class SendBalance {
         this.state.set(null);
 
         try {
-            await this.bankAccount.send(account.$id, recipient.userId, 'eur', this.amount.value);
+            await this.bankAccount.send(recipient.userId, 'eur', this.amount.value);
             this.state.set(`Sent to ${recipient.name}`);
             this.amount.reset();
         } catch(e:any) {

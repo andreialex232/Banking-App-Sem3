@@ -102,13 +102,13 @@ export class Balance implements OnInit, AfterViewInit, OnDestroy {
 
     async addFunds() {
         await this.runTransaction((account, curr, amount) =>
-            this.bankAccountService.deposit(account.$id, curr, amount)
+            this.bankAccountService.deposit(curr, amount)
         );
     }
 
     async removeFunds() {
         await this.runTransaction((account, curr, amount) =>
-            this.bankAccountService.withdraw(account.$id, curr, amount)
+            this.bankAccountService.withdraw(curr, amount)
         );
     }
     
@@ -141,7 +141,7 @@ export class Balance implements OnInit, AfterViewInit, OnDestroy {
         this.isDeleting.set(true);
 
         try {
-            await this.bankAccountService.removeCurrency(account.$id, curr);
+            await this.bankAccountService.removeCurrency(curr);
             this.router.navigate(['/user/overview'])
         } catch(err) {
             console.error('Failed to remove currency', err);

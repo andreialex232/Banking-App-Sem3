@@ -80,7 +80,7 @@ export class CurrencyConverter {
         try {
             const account = this.bankAccountService.bankAccount();
             if (!account) throw new Error('No account loaded');
-            const converted = await this.bankAccountService.transfer(account.$id, from, to, amount!);
+            const converted = await this.bankAccountService.transfer(from, to, amount!);
             this.result.set(`${this.cc.format(amount!, from)} = ${this.cc.format(converted, to)}`);            
         } catch(err) {
             this.apiError.set(err instanceof Error ? err.message : 'Something went wrong. Try later.');
