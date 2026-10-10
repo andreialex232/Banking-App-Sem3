@@ -59,6 +59,12 @@ export class Balance implements OnInit {
     }
 
     async addFunds() {
+        const amount = this.depositAmount.value;
+        if(amount !== null && amount > this.dailyLimit()) {
+            this.error.set(`The maximum deposit is ${this.dailyLimit()} EUR`);
+            return;
+        }
+        
         await this.runTransaction((curr, amount) =>
             this.bankAccountService.deposit(curr, amount)
         );
