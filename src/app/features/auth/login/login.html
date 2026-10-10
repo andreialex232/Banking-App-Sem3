@@ -1,18 +1,18 @@
-<div class="bg-[url('/assets/images/test-register-2.jpg')] min-h-screen bg-cover bg-center grid grid-cols-12 items-start gap-4 py-10 min-h-screen h-auto">
-    <form #formEl [formGroup]="loginForm" (ngSubmit)="tryLogin()" class="px-8 py-8 col-start-2 col-end-8 text-black bg-white rounded-xl h-fit">
-        <div class="space-y-2">
-            <h2 class="text-3xl text-black sm:text-5xl font-bold"><span class="text-primary">Welcome back</span> friend</h2>
-            <p class="font-medium text-xl text-text-main">Log in to resume smart-saving</p>
+<app-auth-layout
+    highlight="Welcome back"
+    heading="friend"
+    subtitle="Log in to resume smart-saving"
+    footerText="Don't have an account?"
+    footerLink="/register">
 
-            <div class="mt-10 mb-0 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                
-                @let email = this.loginForm.controls.email;
+    <form #formEl [formGroup]="loginForm" (ngSubmit)="tryLogin()">
+        <div class="mt-10 mb-0 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+            @let email = this.loginForm.controls.email;
                 <app-input-field
                     [autocomplete]="'email'"
                     [control]="email"
                     colSpan="col-span-4"
                     label="Email Address"
-                    autocomplete="email"
                     id="email">
                     <ng-container errors>
                         @if (email.hasError('required')) {
@@ -26,32 +26,27 @@
                 
                 @let password = this.loginForm.controls.password;
                 <app-input-field
-                    [autocomplete]="'password'"
+                    [autocomplete]="'current-passwords'"
                     label="Password"
                     colSpan="col-span-4"
                     id="password"
                     type="password"
                     [control]="password">
-                    <ng-container errors>
-                        @if(password.hasError('required')) {
-                            Password is required
-                        }
-                    </ng-container>
-                </app-input-field>
-                
-            </div>
-            <div class="col-span-6 mb-6">
-                <a class="text-xs hover:underline" href="">Forgot password?</a>
-            </div>
+                <ng-container errors>
+                    @if(password.hasError('required')) {
+                        Password is required
+                    }
+                </ng-container>
+            </app-input-field>
+        </div>
 
-            <div class="flex gap-4 items-center">
-                <button appButton variant="primary" buttonType="submit" [loading]="isSubmitting()">Log in</button>
-                <a class="text-sm cursor-pointer hover:underline" routerLink="/register">Don't have an account?</a>
-                <p class="text-red-500">
-                    {{errorMessage()}}
-                </p>
-            </div>
-    
+        <div class="col-span-6 mb-6">
+            <a class="text-xs hover:underline" href="">Forgot password?</a>
+        </div>
+
+        <div class="flex gap-4 items-center">
+            <button appButton variant="primary" buttonType="submit" [loading]="isSubmitting()">Log in</button>
+            <p class="text-red-500">{{ errorMessage() }}</p>
         </div>
     </form>
-</div>
+</app-auth-layout>

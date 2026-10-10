@@ -6,13 +6,13 @@ import { InputField } from '../components/input-field/input-field';
 import { getAppwriteError, markIfInvalid, scrollToFirstInvalidField } from '@shared/utils/form.utils';
 import { AuthService } from '@core/services/auth/auth.service';
 import { AuthRedirectService } from '@core/services/auth-redirect.service';
-import { RouterLink } from '@angular/router';
 import { Button } from '@shared/ui/button/button';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AuthLayout } from '../components/auth-layout/auth-layout';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, InputField, Button, RouterLink],
+  imports: [ReactiveFormsModule, InputField, Button, AuthLayout],
   templateUrl: `./register.html`,
   styles: ``,
 })
@@ -69,6 +69,7 @@ export class Register implements OnInit {
         try {
             this.isSubmitting.set(true);
             await this.auth.register(payload);
+            this.otherError.set(null);
             await this.nav.redirectAfterLogin('user/overview');
         } catch(error) {
             this.otherError.set(getAppwriteError(error));
