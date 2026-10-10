@@ -82,7 +82,7 @@ export class Balance implements OnInit, AfterViewInit, OnDestroy {
                 this.currency.set(params.get('currency')! as SupportedCurrency);
             });
 
-        const user = await this.authService.getCurrentUser();
+        const user = await this.authService.restoreSession();
         if (user) {
             await this.bankAccountService.loadBankAccount(user.$id);
         }

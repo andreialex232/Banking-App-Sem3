@@ -1,12 +1,13 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { AppwriteService } from '@core/services/appwrite.service';
-import { Query } from 'appwrite';
+import { ID, Query } from 'appwrite';
 import { environment } from '@/environments/environment';
 import { SupportedCurrency } from '@core/models/currency/currency.models';
 import { BankAccount } from '@core/models/bank-account/bank-account.models';
 import { ExchangeRateService } from '@core/services/bank-account/exchange-rate.service';
 import { dailyDepositLimitFor } from '@core/models/bank-account/plans.models';
 import { firstValueFrom } from 'rxjs';
+import { ownerPermissions } from '@core/utils/permissions';
 
 @Injectable({
   providedIn: 'root',
@@ -39,6 +40,24 @@ export class BankAccountService {
         });
 
         const account = result.rows.length > 0 ? (result.rows[0] as unknown as BankAccount) : null;
+        this.bankAccount.set(account);
+        return account;
+    }
+    
+    async createBankAccount(userId: string): Promise<BankAccount> {
+        const row = await this.appwrite.tablesDB.createRow({
+            databaseId: environment.appwriteDatabaseId,
+            tableId: environment.appwriteBankAccountsId,
+            rowId: ID.unique(),
+            data: {
+                userId,
+                plan: 'free',
+                eur: 0,
+            },
+            permissions: ownerPermissions(userId),
+        });
+
+        const account = row as unknown as BankAccount;
         this.bankAccount.set(account);
         return account;
     }

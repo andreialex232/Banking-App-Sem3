@@ -1,20 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { AppwriteService } from '@core/services/appwrite.service';
-import { ID, Permission, Role, Models, Query } from 'appwrite';
-import { environment } from '@/environments/environment';
+import { ID, Models } from 'appwrite';
 import { BankAccountService } from '../bank-account/bank-account.service';
 import { ProfileService } from '../profile.service';
-import { ownerPermissions } from '@core/utils/permissions';
-
-export interface RegisterPayload {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-    country: string;
-    street: string;
-    postalCode: string;
-}
+import { RegisterPayload } from '@core/models/profile/profile.models';
 
 @Injectable({
   providedIn: 'root',
@@ -26,7 +15,8 @@ export class AuthService {
 
     public currentUser = signal<Models.User<Models.Preferences> | null>(null);
 
-    async getCurrentUser(forceRefresh = false) {
+    // Only checks who is logged in. Does NOT load profile or bank data.
+    async restoreSession(forceRefresh = false) {
         if(!forceRefresh && this.currentUser()) {
             return this.currentUser();
         }
@@ -34,13 +24,12 @@ export class AuthService {
         try {
             const user = await this.appwrite.account.get();
             this.currentUser.set(user);
-            await this.loadUserData(user.$id);
             return user;
         } catch {
             this.currentUser.set(null);
             return null;
-        };
-    };
+        }
+    }
 
     async logOut() {
         try {
@@ -50,11 +39,16 @@ export class AuthService {
         } catch (error) {
             console.log('Logout method error:', error)
         } finally {
-            this.currentUser.set(null);
-            this.bankAccountService.bankAccount.set(null);
-            this.profileService.profile.set(null);
+            this.clearUserStates()
         };
-    };
+    }
+
+    // Empties everything that belongs to the previous user
+    private clearUserStates() {
+        this.currentUser.set(null);
+        this.bankAccountService.bankAccount.set(null);
+        this.profileService.profile.set(null);
+    }
 
 
     async createAccount(data: RegisterPayload): Promise<string> {
@@ -71,105 +65,76 @@ export class AuthService {
     async logIn(email: string, password: string, repair = true): Promise<void> {
         try {
             await this.appwrite.account.deleteSession({sessionId: 'current'})
-        } catch(err) {}
-        this.currentUser.set(null);
-        this.bankAccountService.bankAccount.set(null);
-        await this.appwrite.account.createEmailPasswordSession({
-            email,
-            password
-        });
-        if (repair) await this.ensureRowsExist();
-        await this.getCurrentUser(true);
+        } catch {
+            // Expected when nobody is logged in: there is no session to delete.
+        }
+        this.clearUserStates();
+
+        await this.appwrite.account.createEmailPasswordSession({ email, password });
+
+        const user = await this.restoreSession(true);
+        if (!user) throw new Error('Login failed. Please try again.');
+
+        // register() passes repair = false and creates the rows itself
+        if (repair) await this.ensureRowsExist(user);
     }
 
-    private async ensureRowsExist() {
+    // Loads the user's rows and creates any that are missing (old accounts)
+    private async ensureRowsExist(user: Models.User<Models.Preferences>) {
         try {
-            const user = await this.appwrite.account.get();
-            const query = [Query.equal('userId', user.$id), Query.limit(1)];
-
-            const [profiles, banks] = await Promise.all([
-                this.appwrite.tablesDB.listRows({
-                    databaseId: environment.appwriteDatabaseId,
-                    tableId: environment.appwriteProfilesTableId,
-                    queries: query,
-                }),
-                this.appwrite.tablesDB.listRows({
-                    databaseId: environment.appwriteDatabaseId,
-                    tableId: environment.appwriteBankAccountsId,
-                    queries: query,
-                }),
+            const [profile, bank] = await Promise.all([
+                this.profileService.loadProfile(user.$id, true),
+                this.bankAccountService.loadBankAccount(user.$id, true),
             ]);
 
-            if (profiles.total === 0) {
+            const jobs: Promise<unknown>[] = [];
+
+            if (!profile) {
                 const [firstName, ...rest] = user.name.split(' ');
-                await this.insertRowsUserProfile({
+                jobs.push(this.profileService.createProfile({
                     email: user.email,
                     firstName,
                     lastName: rest.join(' '),
                     country: '',
                     street: '',
                     postalCode: '',
-                }, user.$id);
+                }, user.$id));
             }
-            if (banks.total === 0) {
-                await this.insertRowsBankAccount(user.$id);
+
+            if (!bank) {
+                jobs.push(this.bankAccountService.createBankAccount(user.$id));
             }
+
+            await Promise.all(jobs);
+
         } catch (err) {
             console.error('Could not verify account rows:', err);
         }
-    }
-
-
-    async insertRows(data: RegisterPayload, userId: string) {
-        await this.insertRowsUserProfile(data, userId);
-        await this.insertRowsBankAccount(userId);
-    }
-
-    async insertRowsUserProfile(data: Omit<RegisterPayload, 'password'>, userId: string) {
-        await this.appwrite.tablesDB.createRow({
-            databaseId: environment.appwriteDatabaseId,
-            tableId: environment.appwriteProfilesTableId,
-            rowId: ID.unique(),
-            data: {
-                userId: userId,
-                email: data.email.trim().toLowerCase(),
-                firstName: data.firstName,
-                lastName: data.lastName,
-                country: data.country,
-                street: data.street,
-                postalCode: data.postalCode
-            },
-            permissions: ownerPermissions(userId)
-        })
-    }
-
-    async insertRowsBankAccount(userId: string) {
-        await this.appwrite.tablesDB.createRow({
-            databaseId: environment.appwriteDatabaseId,
-            tableId: environment.appwriteBankAccountsId,
-            rowId: ID.unique(),
-            data: {
-                userId: userId,
-                plan: 'free',
-                eur: 0,
-            },
-            permissions: ownerPermissions(userId)
-        })
     }
 
     async register(data: RegisterPayload) {
         const accountId = await this.createAccount(data);
         await this.logIn(data.email, data.password, false);
         try {
-            await this.insertRows(data, accountId);
-            await this.loadUserData(accountId);
+            // Both create methods set their own signal from the returned row
+            await Promise.all([
+                this.profileService.createProfile(data, accountId),
+                this.bankAccountService.createBankAccount(accountId),
+            ]);
         } catch (err) {
             console.error(err);
             throw new Error('Account created, but setting up your profile failed. Please contact support.');
         }
-       
     }
 
+    async init(): Promise<void> {
+        await Promise.race([
+            this.restoreSessionAndData(),
+            new Promise<void>(resolve => setTimeout(resolve, 5000))
+        ]);
+    }
+
+    // Loads the profile and bank account of this user into their signals.
     private async loadUserData(userId: string) {
         try {
             await Promise.all([
@@ -181,10 +146,8 @@ export class AuthService {
         }
     }
 
-    async init(): Promise<void> {
-        await Promise.race([
-            this.getCurrentUser(),
-            new Promise<void>(resolve => setTimeout(resolve, 5000))
-        ])
+    private async restoreSessionAndData() {
+        const user = await this.restoreSession();
+        if (user) await this.loadUserData(user.$id);
     }
 }

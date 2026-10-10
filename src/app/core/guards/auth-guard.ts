@@ -6,15 +6,10 @@ export const authGuard: CanActivateFn = async (route, state) => {
     const auth = inject(AuthService);
     const router = inject(Router);
 
-    const user = await auth.getCurrentUser();
-    console.log('Auth Guard User:', user)
+    const user = await auth.restoreSession();
+    if (user) return true;
 
-    if(user) {
-        return true;
-    }
-
-    console.log('Redirecting to login...');
     return router.createUrlTree(['/login'], {
-        queryParams: {returnUrl: state.url}
+        queryParams: { returnUrl: state.url }
     });
 };

@@ -27,7 +27,7 @@ export class Overview implements OnInit {
     selectedCurrency = signal<SupportedCurrency | null>(null);
 
     async ngOnInit(): Promise<void> {
-        const user = await this.authService.getCurrentUser();
+        const user = await this.authService.restoreSession();
         if(user) {
             await this.bankAcc.loadBankAccount(user.$id);
         } else {

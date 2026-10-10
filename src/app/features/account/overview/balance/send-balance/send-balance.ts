@@ -5,7 +5,8 @@ import { AmountField } from '@shared/forms/amount-field/amount-field';
 import { FormsModule, FormControl, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Button } from '@shared/ui/button/button';
 import { ProfileBadge } from '@shared/ui/profile-badge/profile-badge';
-import { ProfileService, Recipient } from '@core/services/profile.service';
+import { ProfileService } from '@core/services/profile.service';
+import { Recipient } from '@core/models/profile/profile.models';
 
 @Component({
   selector: 'app-send-balance',

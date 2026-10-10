@@ -1,22 +1,10 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Models, Query } from 'appwrite';
+import { Models, Query, ID } from 'appwrite';
 import { AppwriteService } from '@core/services/appwrite.service';
 import { AvatarsService } from './avatars.service';
 import { environment } from '@/environments/environment';
-
-export interface ProfileRow extends Models.Row {
-    userId: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    image?: string | null;
-}
-
-export interface Recipient {
-    userId: string;
-    name: string;
-    image?: string | null;
-}
+import { ownerPermissions } from '@core/utils/permissions';
+import { ProfileRow, Recipient, NewProfileData, RegisterPayload } from '@core/models/profile/profile.models';
 
 @Injectable({
   providedIn: 'root',
@@ -42,6 +30,28 @@ export class ProfileService {
         });
 
         const profile = result.rows[0] ?? null;
+        this.profile.set(profile);
+        return profile;
+    }
+
+    async createProfile(data: NewProfileData, userId: string): Promise<ProfileRow> {
+        const row = await this.appwrite.tablesDB.createRow({
+            databaseId: environment.appwriteDatabaseId,
+            tableId: environment.appwriteProfilesTableId,
+            rowId: ID.unique(),
+            data: {
+                userId,
+                email: data.email.trim().toLowerCase(),
+                firstName: data.firstName,
+                lastName: data.lastName,
+                country: data.country,
+                street: data.street,
+                postalCode: data.postalCode,
+            }, 
+            permissions: ownerPermissions(userId)
+        })
+
+        const profile = row as unknown as ProfileRow;
         this.profile.set(profile);
         return profile;
     }
