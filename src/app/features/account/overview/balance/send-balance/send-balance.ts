@@ -7,10 +7,11 @@ import { Button } from '@shared/ui/button/button';
 import { ProfileBadge } from '@shared/ui/profile-badge/profile-badge';
 import { ProfileService } from '@core/services/profile.service';
 import { Recipient } from '@core/models/profile/profile.models';
+import { AppSectionTitle } from '@shared/ui/app-section-title/app-section-title';
 
 @Component({
   selector: 'app-send-balance',
-  imports: [AmountField, FormsModule, Button, ProfileBadge, ReactiveFormsModule],
+  imports: [AmountField, FormsModule, Button, ProfileBadge, ReactiveFormsModule, AppSectionTitle],
   templateUrl: './send-balance.html',
   styles: ``,
 })

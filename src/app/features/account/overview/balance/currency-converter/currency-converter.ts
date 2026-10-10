@@ -10,10 +10,11 @@ import { Rate } from '@core/models/bank-account/exchange-rate.models';
 import { BankAccountService } from '@core/services/bank-account/bank-account.service';
 import { catchError, of } from 'rxjs';
 import { formatMoney } from '@shared/utils/format-money';
+import { AppSectionTitle } from '@shared/ui/app-section-title/app-section-title';
 
 @Component({
   selector: 'app-currency-converter',
-  imports: [ReactiveFormsModule, Button, AmountField],
+  imports: [ReactiveFormsModule, Button, AmountField, AppSectionTitle],
   templateUrl: `./currency-converter.html`,
   styles: ``
 })

@@ -3,9 +3,10 @@ import { SUPPORTED_CURRENCIES, SupportedCurrency } from '@core/models/currency/c
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { BankAccountService } from '@core/services/bank-account/bank-account.service';
 import { Button } from '@shared/ui/button/button';
+import { AppSectionTitle } from '@shared/ui/app-section-title/app-section-title';
 @Component({
   selector: 'app-overview',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, Button],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, Button, AppSectionTitle],
   standalone: true,
   templateUrl: `./overview.html`,
   host: {
