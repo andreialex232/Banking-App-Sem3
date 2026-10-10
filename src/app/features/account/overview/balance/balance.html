@@ -1,10 +1,12 @@
 <div class="flex justify-around flex-col gap-14">
     <div class="shadow-custom-sm pb-4 pr-4 pl-4 grid grid-cols-12">
         <div class="col-start-1 col-end-5 flex gap-4 flex-col h-full">
-            <div class="relative w-42 h-42">
-                <canvas #donutCanvas></canvas>
-            </div>
-
+            <app-deposit-limit-chart
+                [depositedToday]="depositedToday()"
+                [remaining]="remaining()"
+                [balanceText]="balanceText()">
+            </app-deposit-limit-chart>
+            
             <div class="flex justify-between items-center">
                 <div class="font-semibold text-xs text-gray-500 flex flex-col">
                     <div>Deposited today: {{ depositedToday() | number: '1.0-2' }} of {{ dailyLimit() | number }} EUR ({{ usedPercentage() }}%)</div>

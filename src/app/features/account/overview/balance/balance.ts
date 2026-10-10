@@ -1,9 +1,8 @@
-import { AfterViewInit, Component, computed, DestroyRef, effect, inject, OnInit, signal, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BankAccount } from '@core/models/bank-account/bank-account.models';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SupportedCurrency } from '@core/models/currency/currency.models';
-import { Chart, registerables } from 'chart.js';
 import { AuthService } from '@core/services/auth/auth.service';
 import { BankAccountService } from '@core/services/bank-account/bank-account.service';
 import { CurrencyConverter } from './currency-converter/currency-converter';
@@ -13,15 +12,15 @@ import { DecimalPipe } from '@angular/common';
 import { AmountField } from '@shared/forms/amount-field/amount-field';
 import { SendBalance } from './send-balance/send-balance';
 import { formatMoney } from '@shared/utils/format-money';
-Chart.register(...registerables);
+import { DepositLimitChart } from '@shared/ui/chart/deposit-limit-chart';
 
 @Component({
   selector: 'app-balance',
-  imports: [Button, FormsModule, DecimalPipe, CurrencyConverter, AmountField, SendBalance],
+  imports: [Button, FormsModule, DecimalPipe, CurrencyConverter, AmountField, SendBalance, DepositLimitChart],
   templateUrl: `./balance.html`,
   styles: ``,
 })
-export class Balance implements OnInit, AfterViewInit, OnDestroy {
+export class Balance implements OnInit {
     private route = inject(ActivatedRoute);
     private authService = inject(AuthService);
     private bankAccountService = inject(BankAccountService);
@@ -36,9 +35,6 @@ export class Balance implements OnInit, AfterViewInit, OnDestroy {
         ])
     })
     get depositAmount() {return this.form.controls.depositAmount; }
-
-    @ViewChild('donutCanvas') donutCanvas!: ElementRef<HTMLCanvasElement>;
-    chart!: Chart;
 
     currency = signal<SupportedCurrency | null>(null);
     bankAccount = this.bankAccountService.bankAccount;
@@ -55,6 +51,10 @@ export class Balance implements OnInit, AfterViewInit, OnDestroy {
         const curr = this.currency();
         return account && curr ? (account[curr] ?? 0) : 0;
     });
+    balanceText = computed(() => {
+        const curr = this.currency();
+        return curr ? formatMoney(this.balance(), curr) : '';
+    });
 
     remaining = computed(() => Math.max(this.dailyLimit() - this.depositedToday(), 0));
     usedPercentage = computed(() =>
@@ -63,18 +63,6 @@ export class Balance implements OnInit, AfterViewInit, OnDestroy {
             : 0
     );
 
-    constructor() {
-        effect(() => {
-            this.currency();
-            this.balance();
-            this.depositedToday();
-
-            if(this.viewReady) {
-                this.createChart();
-            }
-        });
-    }
-    
     async ngOnInit(): Promise<void> {
         this.route.paramMap
             .pipe(takeUntilDestroyed(this.destroyRef))
@@ -86,17 +74,6 @@ export class Balance implements OnInit, AfterViewInit, OnDestroy {
         if (user) {
             await this.bankAccountService.loadBankAccount(user.$id);
         }
-    }
-
-    ngAfterViewInit(): void {
-        this.viewReady = true;
-        if (this.currency()) {
-            this.createChart();
-        }
-    };
-
-    ngOnDestroy(): void {
-        this.chart.destroy();
     }
 
     async addFunds() {
@@ -111,7 +88,6 @@ export class Balance implements OnInit, AfterViewInit, OnDestroy {
         );
     }
     
-
     private async runTransaction(action: (account: BankAccount, curr: SupportedCurrency, amount: number) => Promise<void>) {
         const account = this.bankAccount();
         const curr = this.currency();
@@ -146,56 +122,6 @@ export class Balance implements OnInit, AfterViewInit, OnDestroy {
             console.error('Failed to remove currency', err);
         } finally {
             this.isDeleting.set(false);
-        }
-    }
-
-
-    //Chart stuff below
-    createChart() {
-        const rootStyles = getComputedStyle(document.documentElement);
-        const primaryColor = rootStyles.getPropertyValue('--color-primary').trim();
-
-        this.chart?.destroy();
-
-        this.chart = new Chart<'doughnut'>(this.donutCanvas.nativeElement, {
-            type: 'doughnut',
-            data: {
-                labels: ['Deposited today', 'Remaining today'],
-                datasets: [{
-                    data: [this.depositedToday(), this.remaining()],
-                    backgroundColor: [primaryColor, '#e5e7eb'],
-                    borderWidth: 2,
-                    cutout: '70%'
-                }] as any
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            },
-            plugins: [this.centerTextPlugin]
-        })
-    }
-
-    centerTextPlugin = {
-        id: 'centerText',
-        afterDraw: (chart: Chart) => {
-            const { ctx } = chart;
-            const { width, height } = chart;
-            ctx.save();
-
-            ctx.font = 'bold 20px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#000';
-
-            const text = formatMoney(this.balance(), this.currency()!);
-            ctx.fillText(text, width / 2, height / 2);
-            ctx.restore();
         }
     }
 }
