@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { ID, Permission, Role } from 'appwrite';
 import { AppwriteService } from '@core/services/appwrite.service';
 import { environment } from '@/environments/environment';
+import { ownerPermissions } from '@core/utils/permissions';
 
 @Injectable({
   providedIn: 'root',
@@ -17,11 +18,7 @@ export class AvatarsService {
             bucketId: environment.appwriteBucketId,
             fileId: ID.unique(),
             file,
-            permissions: [
-                Permission.read(Role.any()),
-                Permission.update(Role.user(userId)),
-                Permission.delete(Role.user(userId)),
-            ]
+            permissions: ownerPermissions(userId)
         })
 
         return uploaded.$id

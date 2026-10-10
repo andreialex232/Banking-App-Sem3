@@ -4,6 +4,7 @@ import { ID, Permission, Role, Models, Query } from 'appwrite';
 import { environment } from '@/environments/environment';
 import { BankAccountService } from '../bank-account/bank-account.service';
 import { ProfileService } from '../profile.service';
+import { ownerPermissions } from '@core/utils/permissions';
 
 export interface RegisterPayload {
     email: string;
@@ -138,11 +139,7 @@ export class AuthService {
                 street: data.street,
                 postalCode: data.postalCode
             },
-            permissions: [
-                Permission.read(Role.user(userId)),
-                Permission.update(Role.user(userId)),
-                Permission.delete(Role.user(userId)),
-            ]
+            permissions: ownerPermissions(userId)
         })
     }
 
@@ -156,15 +153,7 @@ export class AuthService {
                 plan: 'free',
                 eur: 0,
             },
-            permissions: [
-                Permission.read(Role.user(userId)),
-                Permission.update(Role.user(userId)),
-                Permission.delete(Role.user(userId)),
-                // NOTE: Users can update their own row so deposits work from the client.
-                // In production, this would be read-only for users, and plan/balance
-                // changes (and this row's creation) would go through a backend or Appwrite Function in this case,
-                // since client-side permissions can be bypassed via dev tools.
-            ]
+            permissions: ownerPermissions(userId)
         })
     }
 
