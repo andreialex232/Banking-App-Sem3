@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { NonNullableFormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '@core/services/auth/auth.service';
 import { Button } from '@shared/ui/button/button';
@@ -17,6 +17,7 @@ export class Login {
     private fb = inject(NonNullableFormBuilder);
     private auth = inject(AuthService);
     private nav = inject(AuthRedirectService);
+    private formEl = viewChild.required<ElementRef<HTMLFormElement>>('formEl');
     protected readonly isSubmitting = signal(false);
     protected readonly errorMessage = signal<string | null>(null);
 
@@ -27,7 +28,7 @@ export class Login {
 
     async tryLogin(): Promise<void> {
         this.loginForm.updateValueAndValidity();
-        scrollToFirstInvalidField(this.loginForm);
+        scrollToFirstInvalidField(this.loginForm, this.formEl().nativeElement);
 
         if(this.loginForm.invalid) return;
 

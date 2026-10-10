@@ -1,5 +1,5 @@
 <div class="bg-[url('/assets/images/test-register-2.jpg')] min-h-screen bg-cover bg-center grid grid-cols-12 items-start gap-4 py-10 min-h-screen h-auto">
-    <form [formGroup]="loginForm" (ngSubmit)="tryLogin()" class="px-8 py-8 col-start-2 col-end-8 text-black bg-white rounded-xl h-fit">
+    <form #formEl [formGroup]="loginForm" (ngSubmit)="tryLogin()" class="px-8 py-8 col-start-2 col-end-8 text-black bg-white rounded-xl h-fit">
         <div class="space-y-2">
             <h2 class="text-3xl text-black sm:text-5xl font-bold"><span class="text-primary">Welcome back</span> friend</h2>
             <p class="font-medium text-xl text-text-main">Log in to resume smart-saving</p>

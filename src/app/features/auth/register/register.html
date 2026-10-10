@@ -1,5 +1,5 @@
 <div class="bg-[url('/assets/images/test-register-2.jpg')] min-h-screen bg-cover bg-center grid grid-cols-12 items-start gap-4 py-10 min-h-screen h-auto">
-    <form [formGroup]="registerForm" (ngSubmit)="tryCreateAccount()" class="px-8 py-8 col-start-2 col-end-8 text-black bg-white rounded-xl h-fit">
+    <form #formEl [formGroup]="registerForm" (ngSubmit)="tryCreateAccount()" class="px-8 py-8 col-start-2 col-end-8 text-black bg-white rounded-xl h-fit">
             <div class="space-y-12">
                 <div class="border-b border-white/10 pb-6 flex justify-start gap-2 flex-col">
                 

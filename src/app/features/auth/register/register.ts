@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { passwordMatchValidator } from '../validators/password-match.validator';
 import { postalCodeValidator } from '../validators/postal-code.validators';
@@ -21,6 +21,7 @@ export class Register implements OnInit {
     private fb = inject(NonNullableFormBuilder);
     private auth = inject(AuthService);
     private nav = inject(AuthRedirectService);
+    private formEl = viewChild.required<ElementRef<HTMLFormElement>>('formEl');
     private destroyRef = inject(DestroyRef);
     protected isSubmitting = signal(false);
     protected otherError = signal<string | null>(null)
@@ -59,7 +60,7 @@ export class Register implements OnInit {
 
     async tryCreateAccount(){
         this.registerForm.updateValueAndValidity();
-        scrollToFirstInvalidField(this.registerForm);
+        scrollToFirstInvalidField(this.registerForm, this.formEl().nativeElement);
 
         if(this.registerForm.invalid) return;
         
