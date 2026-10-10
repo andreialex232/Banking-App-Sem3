@@ -5,7 +5,7 @@ import { Button } from '@shared/ui/button/button';
 import { RouterLink } from '@angular/router';
 import { InputField } from '../components/input-field/input-field';
 import { scrollToFirstInvalidField, getAppwriteError } from '@shared/utils/form.utils';
-import { NavigationService } from '@core/services/navigation.service';
+import { AuthRedirectService } from '@core/services/auth-redirect.service';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +16,7 @@ import { NavigationService } from '@core/services/navigation.service';
 export class Login {
     private fb = inject(NonNullableFormBuilder);
     private auth = inject(AuthService);
-    private nav = inject(NavigationService);
+    private nav = inject(AuthRedirectService);
     protected readonly isSubmitting = signal(false);
     protected readonly errorMessage = signal<string | null>(null);
 
@@ -36,7 +36,7 @@ export class Login {
         const { email, password } = this.loginForm.getRawValue();
         try {
             await this.auth.logIn(email, password);
-            await this.nav.redirectUser('user/overview');
+            await this.nav.redirectAfterLogin('user/overview');
         } catch(error: unknown) {
             this.errorMessage.set(getAppwriteError(error));
         } finally {

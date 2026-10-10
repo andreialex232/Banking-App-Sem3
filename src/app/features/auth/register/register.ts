@@ -5,7 +5,7 @@ import { postalCodeValidator } from '../validators/postal-code.validators';
 import { InputField } from '../components/input-field/input-field';
 import { getAppwriteError, markIfInvalid, scrollToFirstInvalidField } from '@shared/utils/form.utils';
 import { AuthService } from '@core/services/auth/auth.service';
-import { NavigationService } from '@core/services/navigation.service';
+import { AuthRedirectService } from '@core/services/auth-redirect.service';
 import { RouterLink } from '@angular/router';
 import { Button } from '@shared/ui/button/button';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -20,7 +20,7 @@ export class Register implements OnInit {
     markIfInvalid = markIfInvalid;
     private fb = inject(NonNullableFormBuilder);
     private auth = inject(AuthService);
-    private nav = inject(NavigationService);
+    private nav = inject(AuthRedirectService);
     private destroyRef = inject(DestroyRef);
     protected isSubmitting = signal(false);
     protected otherError = signal<string | null>(null)
@@ -68,7 +68,7 @@ export class Register implements OnInit {
         try {
             this.isSubmitting.set(true);
             await this.auth.register(payload);
-            await this.nav.redirectUser('user/overview');
+            await this.nav.redirectAfterLogin('user/overview');
         } catch(error) {
             this.otherError.set(getAppwriteError(error));
         } finally {
