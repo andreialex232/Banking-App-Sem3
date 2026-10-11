@@ -1,5 +1,5 @@
-import { Component, effect, input, signal } from '@angular/core';
-import { ReactiveFormsModule, FormControl, AbstractControl } from '@angular/forms';
+import { Component, input, signal } from '@angular/core';
+import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 import { markIfInvalid, showSuccess } from '@shared/utils/form.utils';
 
 @Component({
@@ -7,23 +7,29 @@ import { markIfInvalid, showSuccess } from '@shared/utils/form.utils';
   imports: [ReactiveFormsModule],
   standalone: true,
   host: {
-    '[class]': 'colSpan()'
+    '[class]': 'colSpan()',
+    '[attr.id]': 'null'
   },
   template: `
 <div>
-    <label [for]="id()" class="grid grid-cols-1 text-sm/6 font-medium">
-        <span [class.opacity-0]="control().invalid && control().touched" class="col-start-1 row-start-1 ">{{ label() }}</span>
-        <span [class.opacity-0]="control().invalid && control().untouched" class="col-start-1 row-start-1 text-danger">
-            <ng-content select="[errors]"></ng-content>
-        </span>
-    </label>
+    <div class="grid grid-cols-1 text-sm/6 font-medium">
+        <label [for]="id()" [class.opacity-0]="showError()" class="col-start-1 row-start-1">{{ label() }}</label>
+        <div [id]="id() + '-error'" aria-live="polite" class="col-start-1 row-start-1 text-danger">
+            @if (showError()) {
+                <ng-content select="[errors]"></ng-content>
+            }
+        </div>
+    </div>
     <div class="mt-2">
-        <input 
+        <input
             [formControl]="control()"
-            [id]="id()" 
-            [type]="type()" 
-            [name]="id()" 
-            [autocomplete]="autocomplete()" 
+            [id]="id()"
+            [type]="type()"
+            [name]="id()"
+            [autocomplete]="autocomplete()"
+            [attr.aria-required]="isRequired()"
+            [attr.aria-invalid]="showError() ? 'true' : null"
+            [attr.aria-describedby]="showError() ? id() + '-error' : null"
             (blur)="onBlur()"
             [class.input-success]="showSuccess(control(), hasBeenInvalid())"
             class="input">
@@ -46,8 +52,16 @@ export class InputField {
     id = input.required<string>();
     autocomplete = input<string>('off');
 
+    showError(): boolean {
+        return this.control().invalid && this.control().touched;
+    }
+
+    isRequired(): boolean {
+        return this.control().hasValidator(Validators.required);
+    }
+
     trackInvalidState(): void {
-        if(this.control().invalid) {
+        if (this.control().invalid) {
             this.hasBeenInvalid.set(true);
         }
     }

@@ -1,5 +1,5 @@
 import { CommonModule} from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { INavigation } from '@core/models/navigation';
 import { Logo } from '@shared/ui/logo/logo';
 import { RouterLink } from "@angular/router";
@@ -11,14 +11,16 @@ import { Button } from '@shared/ui/button/button';
   imports: [CommonModule, Logo, RouterLink, Button],
   template: `
 <header class="grid w-full grid-cols-12 items-center">
-    <nav class="col-span-11">
+    <nav aria-label="Main" class="col-span-11">
         <ul class="flex justify-start items-center gap-4 w-full">
-            <a routerLink="/">
-                <app-logo bankSize="text-xl" yourSize="text-lg" variant="horizontal"></app-logo>
-            </a>
+            <li>
+                <a routerLink="/">
+                    <app-logo bankSize="text-xl" yourSize="text-lg" variant="horizontal"></app-logo>
+                </a>
+            </li>
             @for (item of primaryNav; track item.name) {
-                <li class="">
-                    <a class="group hover:text-white px-4 py-2 hover:bg-[#222] gap-2 hover:rounded-md flex justify-center items-center flex-row-reverse transition-all hover:translate-y-[2px] active:translate-y-[3px]" href="{{item.href}}">{{item.name}}
+                <li>
+                    <a [attr.href]="item.href || null" class="group hover:text-white px-4 py-2 hover:bg-[#222] gap-2 hover:rounded-md flex justify-center items-center flex-row-reverse transition-all hover:translate-y-[2px] active:translate-y-[3px]">{{item.name}}
                         <img [src]="item.svgUrl" aria-hidden="true" alt="" width="24px" class="group-hover:brightness-0 group-hover:invert">
                     </a>
                 </li>

@@ -30,24 +30,28 @@ import { ProfileBadge } from '@shared/ui/profile-badge/profile-badge';
                 (change)="onFileSelected($event)">
 
             @if (isUploading()) {
-                <p class="text-xs text-gray-500 text-center">Uploading...</p>
+                <p role="status" class="text-xs text-gray-500 text-center">Uploading...</p>
             } @else if (avatarState()) {
-                <p class="text-xs text-red-500 text-center">{{ avatarState() }}</p>
+                <p role="alert" class="text-xs text-red-500 text-center">{{ avatarState() }}</p>
             }
         }
         
-        <ul class="font-medium">
+        <nav aria-label="Account sections">
+            <ul class="font-medium">
             @for (item of nav; track item.name) {
-                <li routerLinkActive="active-link" 
-                    [routerLinkActiveOptions]="{ exact: false }"
-                    class="p-2 relative">
-                    <a  class="capitalize before:absolute before:inset-0"
+                <li class="p-2 relative">
+                    <a 
+                        ariaCurrentWhenActive="page"
+                        routerLinkActive="active-link"
+                        class="block p-2 capitalize"
                         [routerLink]="item.href">
                         {{ item.name }}
                     </a>
                 </li>
             }
-        </ul>
+            </ul>
+        </nav>
+        
     </div>
     <!-- End of left side -->
     <!-- right side -->

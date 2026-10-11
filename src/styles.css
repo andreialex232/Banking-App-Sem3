@@ -62,25 +62,9 @@ html, body {
 }
 
 @layer components {
-    /* .btn-base {
-        @apply flex items-center justify-center gap-2 font-dm font-semibold px-6 py-3
-            rounded-lg border-none outline-none text-center cursor-pointer
-            shadow-md transition-all
-            -translate-y-0 hover:-translate-y-0.5 hover:shadow-lg
-            active:translate-y-0
-            focus-visible:outline-2 focus-visible:outline-offset-2
-            disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none;
-    }
-
-    .btn-primary {
-        @apply text-white bg-primary
-            focus-visible:outline-primary
-            hover:bg-primary-hover;
-    } */
-
     .btn-base {
         @apply inline-flex items-center justify-center gap-2 font-dm font-semibold
-            rounded-lg border-none outline-none text-center cursor-pointer
+            rounded-lg border-none text-center cursor-pointer
             shadow-md transition-all
             -translate-y-0 hover:-translate-y-0.5 hover:shadow-lg
             active:translate-y-0
@@ -141,4 +125,13 @@ html, body {
             @apply bg-white text-black;
         }
     }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

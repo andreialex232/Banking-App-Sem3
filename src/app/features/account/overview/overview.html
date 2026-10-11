@@ -1,29 +1,36 @@
 <div class="grid grid-cols-12 mb-40">
     <!-- Title -->
     <div class="col-start-1 col-end-12 flex items-center gap-4">
-        <app-app-section-title>Account</app-app-section-title>
+        <app-app-section-title [level]="1">Account</app-app-section-title>
     </div>
 
     <div class="mt-12 col-start-1 col-end-12">
         <div class="flex">
-            @for (item of ownedCurrencies(); track item.currency) {
-                <a 
-                    [routerLink]="item.currency"
-                    routerLinkActive="bg-white shadow-md"
-                    class="text-xs uppercase font-semibold bg-gray-100 text-gray-700 px-4 py-2 rounded-t-lg rounded-b-none shadow-sm hover:bg-gray-300 transition-colors cursor-pointer">
-                    {{ item.currency }}
-                </a>
-            }
+            <nav aria-label="Currency accounts" class="flex">
+                @for (item of ownedCurrencies(); track item.currency) {
+                    <a 
+                        ariaCurrentWhenActive="page"
+                        [routerLink]="item.currency"
+                        routerLinkActive="bg-white shadow-md"
+                        class="text-xs uppercase font-semibold bg-gray-100 text-gray-700 px-4 py-2 rounded-t-lg rounded-b-none shadow-sm hover:bg-gray-300 transition-colors cursor-pointer">
+                        {{ item.currency }}
+                    </a>
+                }
+            </nav>
             @if(missingCurrencies().length) {
                 <div #menuRoot class="relative">
                     <button
+                        aria-label="Add currency amount"
+                        [attr.aria-expanded]="isMenuOpen()"
+                        aria-controls="add-currency-menu"
                         (click)="toggleMenu()"
                         class="text-xs font-semibold bg-gray-100 text-gray-700 px-4 py-2 rounded-t-lg rounded-b-none shadow-sm hover:bg-gray-300 transition-colors cursor-pointer">+
                     </button>
 
                     @if(isMenuOpen()) {
-                        <div class="absolute right-0 mt-2 bg-white shadow-md rounded-md p-4 z-10 w-48 max-w-[calc(100vw-2rem)] flex flex-col gap-3">
+                        <div id="add-currency-menu" class="absolute right-0 mt-2 bg-white shadow-md rounded-md p-4 z-10 w-48 max-w-[calc(100vw-2rem)] flex flex-col gap-3">
                             <select
+                                aria-label="Currency to add"
                                 (change)="onCurrencySelected($event)"
                                 class="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <option value="" [selected]="!selectedCurrency()" disabled>Select currency</option>
