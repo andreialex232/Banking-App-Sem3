@@ -3,28 +3,30 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { passwordMatchValidator } from '../validators/password-match.validator';
 import { postalCodeValidator } from '../validators/postal-code.validators';
 import { InputField } from '../components/input-field/input-field';
-import { getAppwriteError, markIfInvalid, scrollToFirstInvalidField } from '@shared/utils/form.utils';
+import { getAppwriteError, scrollToFirstInvalidField } from '@shared/utils/form.utils';
 import { AuthService } from '@core/services/auth/auth.service';
 import { AuthRedirectService } from '@core/services/auth-redirect.service';
 import { Button } from '@shared/ui/button/button';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthLayout } from '../components/auth-layout/auth-layout';
+import { SelectField } from '../components/input-field/select-field';
+import { COUNTRY_OPTIONS } from '@core/models/country/countries';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, InputField, Button, AuthLayout],
+  imports: [ReactiveFormsModule, InputField, Button, AuthLayout, SelectField],
   templateUrl: `./register.html`,
   styles: ``,
 })
 export class Register implements OnInit {
-    markIfInvalid = markIfInvalid;
     private fb = inject(NonNullableFormBuilder);
     private auth = inject(AuthService);
     private nav = inject(AuthRedirectService);
     private formEl = viewChild.required<ElementRef<HTMLFormElement>>('formEl');
     private destroyRef = inject(DestroyRef);
     protected isSubmitting = signal(false);
-    protected otherError = signal<string | null>(null)
+    protected otherError = signal<string | null>(null);
+    protected countryOptions = COUNTRY_OPTIONS;
 
     ngOnInit(): void {
         const { country, postalCode, password, confirmPassword } = this.registerForm.controls;

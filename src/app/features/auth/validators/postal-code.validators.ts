@@ -1,27 +1,12 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from "@angular/forms";
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { COUNTRY_BY_NAME } from '@core/models/country/countries';
 
 export const postalCodeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const postalCode = control.value;
+    if (!postalCode) return null;
 
-    const countryInput = control.parent?.get('country')?.value;
-    const postalCodeInput = control.value;
+    const country = COUNTRY_BY_NAME.get(control.parent?.get('country')?.value);
+    if (!country) return null;
 
-    /* if(!countryInput || !postalCodeInput) return null; */
-    if(!postalCodeInput) return null;
-
-    const regexPattern: Record<string,RegExp> = {
-        Denmark: /^\d{4}$/,
-        Sweden: /^\d{3}\s?\d{2}$/,
-        Poland: /^\d{2}-\d{3}$/
-    };
-    const targetPattern = regexPattern[countryInput];
-    if(!targetPattern) return null;
-
-    const isValid = targetPattern.test(postalCodeInput);
-    if (isValid) {
-        return null;
-    } else {
-        return {
-            invalidPostalCode: true 
-        }
-    }
-}
+    return country.postalPattern.test(postalCode) ? null : { invalidPostalCode: true };
+};

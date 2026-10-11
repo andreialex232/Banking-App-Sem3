@@ -96,42 +96,19 @@
 
                 <!-- Country -->
                 @let country = this.registerForm.controls.country;
-                <div class="sm:col-span-3">
-                        <label for="country" class="grid grid-cols-1 text-sm/6 font-medium">
-                            <span [class.opacity-0]="country.invalid && country.touched" class="col-start-1 row-start-1 transition-opacity duration-150">Select country</span>
-                            <span [class.opacity-0]="country.invalid && country.untouched" class="col-start-1 row-start-1 text-red-500 transition-opacity duration-150">
-                                @if(country.hasError('required')) {
-                                    Country is required
-                                }
-                            </span>
-                        </label>
-                        <div class="group mt-2 grid grid-cols-1">
-                            <select 
-                                formControlName="country"
-                                id="country"
-                                name="country" 
-                                (blur)="markIfInvalid(country)"
-                                (change)="markIfInvalid(country)"
-                                [class.outline-red-500]="country.invalid && country.touched"
-                                autocomplete="country-name" 
-                                class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white/5 py-1.5 pr-8 pl-3 text-base outline-1 -outline-offset-1 outline-[var(--color-input-border,#D1D5DB)] focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6 [&>option]:bg-white/5 [&>option]:text-black"
-                            >
-                                <option value="" disabled selected>Select</option>
-                                <option value="Denmark">Denmark</option>
-                                <option value="Sweden">Sweden</option>
-                                <option value="Poland">Poland</option>
-                            </select>
-                            <svg 
-                            viewBox="0 0 16 16" 
-                            fill="currentColor" 
-                            data-slot="icon" 
-                            aria-hidden="true" 
-                            class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-400 transition-transform duration-200 group-focus-within:rotate-180 group-has-[:open]:rotate-180 sm:size-4"
-                            >
-                            <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
-                        </svg>
-                    </div>
-                </div>
+                <app-select-field
+                    id="country"
+                    [control]="country"
+                    label="Select country"
+                    placeholder="Select"
+                    autocomplete="country-name"
+                    [options]="countryOptions">
+                    <ng-container errors>
+                        @if (country.hasError('required')) {
+                            Country is required
+                        }
+                    </ng-container>
+                </app-select-field>
 
                 <!-- Postal code -->
                 @let postalCode = this.registerForm.controls.postalCode;
