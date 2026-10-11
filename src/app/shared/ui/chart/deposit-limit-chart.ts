@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, effect, ElementRef, input, OnDestroy, ViewChild } from '@angular/core';
-import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
+import { ArcElement, Chart, DoughnutController, Tooltip } from 'chart.js';
+Chart.register(DoughnutController, ArcElement, Tooltip);
 
 @Component({
   selector: 'app-deposit-limit-chart',
