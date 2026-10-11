@@ -10,7 +10,7 @@ import { RouterLink } from "@angular/router";
     <div class="mb-10 col-start-2 col-end-12 flex gap-12 justify-center items-center">
     @for (section of footerSections; track section.title) {
         <div>
-        <h3 class="font-dm mb-2 font-semibold text-lg">{{ section.title }}</h3>
+        <h2 class="font-dm mb-2 font-semibold text-lg">{{ section.title }}</h2>
         <ul>
             @for (item of section.items; track item.name) {
             <li [class.pb-1]="!$last">
