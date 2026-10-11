@@ -1,8 +1,12 @@
+<a href="#main" (click)="skipToMain($event)"
+    class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-black focus:outline-2 focus:outline-offset-2 focus:outline-primary">
+    Skip to main content
+</a>
 <div class="grid grid-cols-12 w-full w-[1280px]">
-	<app-header class="col-start-2 col-end-12 w-full pt-4 pb-4"></app-header>
-	<main class="col-span-12">
-		<router-outlet></router-outlet>
-	</main>
-	<app-footer class="w-full col-span-12"></app-footer>
+    <app-header class="col-start-2 col-end-12 w-full pt-4 pb-4"></app-header>
+    <main id="main" #main tabindex="-1" class="col-span-12 focus:outline-none">
+        <router-outlet></router-outlet>
+    </main>
+    <app-footer class="w-full col-span-12"></app-footer>
 </div>
 
