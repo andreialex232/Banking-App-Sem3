@@ -24,7 +24,6 @@ html, body {
 
 @theme {
     /* Fonts */
-    /* --font-quicksand: "Quicksand", sans-serif;  */
     --font-dm: "Kumbh Sans", sans-serif;
 
 
@@ -118,7 +117,8 @@ html, body {
     }
 
     .input,
-    .input-confirm-password {
+    .input-confirm-password,
+    .select {
         @apply block w-full rounded-md bg-white/5 px-3 py-1.5 text-base outline outline-1 outline-[var(--color-input-border)] -outline-offset-1 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6;
 
         &.ng-invalid.ng-touched {
@@ -131,6 +131,14 @@ html, body {
 
         &:disabled {
             @apply opacity-50 bg-white/10 cursor-not-allowed;
+        }
+    }
+    
+    .select {
+        @apply col-start-1 row-start-1 appearance-none pr-8;
+
+        & > option {
+            @apply bg-white text-black;
         }
     }
 }

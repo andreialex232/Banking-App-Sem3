@@ -1,40 +1,32 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { SUPPORTED_CURRENCIES, SupportedCurrency } from '@core/models/currency/currency.models';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { BankAccountService } from '@core/services/bank-account/bank-account.service';
-import { AuthService } from '@core/services/auth/auth.service';
-import { FormsModule } from '@angular/forms';
 import { Button } from '@shared/ui/button/button';
+import { AppSectionTitle } from '@shared/ui/app-section-title/app-section-title';
 @Component({
   selector: 'app-overview',
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, FormsModule, Button],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, Button, AppSectionTitle],
   standalone: true,
-  providers: [],
   templateUrl: `./overview.html`,
-  styles: ``,
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+    '(document:keydown.escape)': 'closeMenu()'
+  }
 })
-export class Overview implements OnInit {
+export class Overview {
     private bankAcc = inject(BankAccountService);
-    private authService = inject(AuthService);
 
-    protected currencies = SUPPORTED_CURRENCIES;
+    private menuRoot = viewChild<ElementRef<HTMLElement>>('menuRoot');
+
     account = this.bankAcc.bankAccount;
-
+    
     isAdding = signal(false);
     
     isMenuOpen = signal(false);
     selectedCurrency = signal<SupportedCurrency | null>(null);
 
-    async ngOnInit(): Promise<void> {
-        const user = await this.authService.getCurrentUser();
-        if(user) {
-            await this.bankAcc.loadBankAccount(user.$id);
-        } else {
-            console.log('No user logged in. (overview.ts)')
-        }
-    }
-    currencyBalances = computed(() => {
+    private currencyBalances = computed(() => {
         const account = this.account();
         if (!account) return [];
 
@@ -45,6 +37,10 @@ export class Overview implements OnInit {
         }));
     });
 
+    ownedCurrencies = computed(() =>
+        this.currencyBalances().filter(item => item.hasAccount)
+    );
+
     missingCurrencies = computed(() =>
         this.currencyBalances().filter(item => !item.hasAccount)
     );
@@ -53,16 +49,33 @@ export class Overview implements OnInit {
         this.isMenuOpen.update(open => !open);
     }
 
+    closeMenu() {
+        this.isMenuOpen.set(false);
+        this.selectedCurrency.set(null);
+    }
+
+    onDocumentClick(event: MouseEvent) {
+        if (!this.isMenuOpen()) return;
+        const root = this.menuRoot()?.nativeElement;
+        if (root && !root.contains(event.target as Node)) {
+            this.closeMenu();
+        }
+    }
+
+    onCurrencySelected(event: Event) {
+        const value = (event.target as HTMLSelectElement).value;
+        const match = this.missingCurrencies().find(item => item.currency === value);
+        this.selectedCurrency.set(match?.currency ?? null);
+    }
+
     async addSelectedCurrency() {
         const currency = this.selectedCurrency();
-        const account = this.account();
-        if (!currency || !account) return;
+        if (!currency) return;
 
         this.isAdding.set(true);
         try {
-            await this.bankAcc.addCurrency(account.$id, currency);
-            this.selectedCurrency.set(null);
-            this.isMenuOpen.set(false);
+            await this.bankAcc.addCurrency(currency);
+            this.closeMenu();
         } catch(err) {
             console.error('Failed to add currency', err);
         } finally {
@@ -70,13 +83,6 @@ export class Overview implements OnInit {
         }
 
     }
-
-
-
-
-
-
-
 
 
 }

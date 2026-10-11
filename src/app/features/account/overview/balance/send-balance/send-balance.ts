@@ -5,11 +5,13 @@ import { AmountField } from '@shared/forms/amount-field/amount-field';
 import { FormsModule, FormControl, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Button } from '@shared/ui/button/button';
 import { ProfileBadge } from '@shared/ui/profile-badge/profile-badge';
-import { ProfileService, Recipient } from '@core/services/profile.service';
+import { ProfileService } from '@core/services/profile.service';
+import { Recipient } from '@core/models/profile/profile.models';
+import { AppSectionTitle } from '@shared/ui/app-section-title/app-section-title';
 
 @Component({
   selector: 'app-send-balance',
-  imports: [AmountField, FormsModule, Button, ProfileBadge, ReactiveFormsModule],
+  imports: [AmountField, FormsModule, Button, ProfileBadge, ReactiveFormsModule, AppSectionTitle],
   templateUrl: './send-balance.html',
   styles: ``,
 })
@@ -29,16 +31,6 @@ export class SendBalance {
     protected isLooking = signal(false);
     protected isSending = signal(false);
 
-    constructor() {
-        this.email.valueChanges
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe(() => {
-                this.recipient.set(null);
-                this.state.set(null);
-                this.lastLookup = null;
-            })
-    }
-
     userForm = new FormGroup({
         amount: new FormControl<number | null>(null, {
             validators: [Validators.required, Validators.min(0.01), Validators.max(1_000_000)], updateOn: 'blur',
@@ -50,6 +42,16 @@ export class SendBalance {
             validators: [Validators.required, Validators.email]
         })
     })
+
+    constructor() {
+        this.email.valueChanges
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => {
+                this.recipient.set(null);
+                this.state.set(null);
+                this.lastLookup = null;
+            })
+    }
 
     get email() {return this.recipientForm.controls.email}
     get amount() {return this.userForm.controls.amount}
@@ -88,7 +90,8 @@ export class SendBalance {
         this.state.set(null);
 
         try {
-            await this.bankAccount.send(account.$id, recipient.userId, 'eur', this.amount.value);
+                    // WORKS WITH ANY CURRENCY, goes from USER 1's DKK BANK ACCOUNT -> USER 2's DKK
+            await this.bankAccount.send(recipient.userId, 'dkk', this.amount.value);
             this.state.set(`Sent to ${recipient.name}`);
             this.amount.reset();
         } catch(e:any) {

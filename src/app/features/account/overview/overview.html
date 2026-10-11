@@ -1,24 +1,21 @@
 <div class="grid grid-cols-12 mb-40">
     <!-- Title -->
     <div class="col-start-1 col-end-12 flex items-center gap-4">
-        <div class="w-2 h-12 shrink-0 bg-primary"></div>
-        <div class="text-xl">Account</div>
+        <app-app-section-title>Account</app-app-section-title>
     </div>
 
     <div class="mt-12 col-start-1 col-end-12">
         <div class="flex">
-            @for (item of currencyBalances(); track item.currency) {
-                @if(item.hasAccount) {
-                    <a 
-                        [routerLink]="item.currency"
-                        routerLinkActive="bg-white shadow-md"
-                        class="text-xs uppercase font-semibold bg-gray-100 text-gray-700 px-4 py-2 rounded-t-lg rounded-b-none shadow-sm hover:bg-gray-300 transition-colors cursor-pointer">
-                        {{ item.currency }}
-                    </a>
-                }
+            @for (item of ownedCurrencies(); track item.currency) {
+                <a 
+                    [routerLink]="item.currency"
+                    routerLinkActive="bg-white shadow-md"
+                    class="text-xs uppercase font-semibold bg-gray-100 text-gray-700 px-4 py-2 rounded-t-lg rounded-b-none shadow-sm hover:bg-gray-300 transition-colors cursor-pointer">
+                    {{ item.currency }}
+                </a>
             }
-            @if(currencyBalances().some(item => !item.hasAccount)) {
-                <div class="relative">
+            @if(missingCurrencies().length) {
+                <div #menuRoot class="relative">
                     <button
                         (click)="toggleMenu()"
                         class="text-xs font-semibold bg-gray-100 text-gray-700 px-4 py-2 rounded-t-lg rounded-b-none shadow-sm hover:bg-gray-300 transition-colors cursor-pointer">+
@@ -27,12 +24,11 @@
                     @if(isMenuOpen()) {
                         <div class="absolute right-0 mt-2 bg-white shadow-md rounded-md p-4 z-10 w-48 max-w-[calc(100vw-2rem)] flex flex-col gap-3">
                             <select
-                                [ngModel]="selectedCurrency()"
-                                (ngModelChange)="selectedCurrency.set($event)"
+                                (change)="onCurrencySelected($event)"
                                 class="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option [ngValue]="null" disabled>Select currency</option>
+                                <option value="" [selected]="!selectedCurrency()" disabled>Select currency</option>
                                 @for (item of missingCurrencies(); track item.currency) {
-                                    <option [ngValue]="item.currency">{{ item.currency.toUpperCase() }}</option>
+                                    <option [selected]="item.currency === selectedCurrency()" [value]="item.currency">{{ item.currency.toUpperCase() }}</option>
                                 }
                             </select>
 
@@ -60,6 +56,5 @@
     </div>
     
     
-
 
 </div>

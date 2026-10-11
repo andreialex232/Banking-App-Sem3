@@ -18,7 +18,7 @@ import { Button } from '@shared/ui/button/button';
             </a>
             @for (item of primaryNav; track item.name) {
                 <li class="">
-                    <a class="group hover:text-white px-4 py-2 hover:bg-[#222] gap-2 hover:rounded-md flex font-quicksand justify-center items-center flex-row-reverse transition-all hover:translate-y-[2px] active:translate-y-[3px]" href="{{item.href}}">{{item.name}}
+                    <a class="group hover:text-white px-4 py-2 hover:bg-[#222] gap-2 hover:rounded-md flex justify-center items-center flex-row-reverse transition-all hover:translate-y-[2px] active:translate-y-[3px]" href="{{item.href}}">{{item.name}}
                         <img [src]="item.svgUrl" aria-hidden="true" alt="" width="24px" class="group-hover:brightness-0 group-hover:invert">
                     </a>
                 </li>
@@ -50,16 +50,12 @@ import { Button } from '@shared/ui/button/button';
   `,
   styles: ``,
 })
-export class Header implements OnInit {
+export class Header {
     private auth = inject(AuthService);
     private router = inject(Router);
 
     protected currentUser = this.auth.currentUser;
     protected isLogouting = signal(false);
-
-    ngOnInit(): void {
-        /* this.auth.getCurrentUser(); */
-    }
 
     protected async logOut() {
         try {

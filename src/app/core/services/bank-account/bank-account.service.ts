@@ -1,23 +1,23 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { AppwriteService } from '@core/services/appwrite.service';
-import { Query, ID } from 'appwrite';
-import { environment } from '@/environments/environment.development';
+import { ID, Query } from 'appwrite';
+import { environment } from '@/environments/environment';
 import { SupportedCurrency } from '@core/models/currency/currency.models';
 import { BankAccount } from '@core/models/bank-account/bank-account.models';
-import { CurrencyService } from './currency-converter.service';
-import { PlansService } from './plans.service';
+import { ExchangeRateService } from '@core/services/bank-account/exchange-rate.service';
+import { dailyDepositLimitFor } from '@core/models/bank-account/plans.models';
 import { firstValueFrom } from 'rxjs';
+import { ownerPermissions } from '@core/utils/permissions';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BankAccountService {
     private appwrite = inject(AppwriteService);
-    private plans = inject(PlansService);
-    private cc = inject(CurrencyService);
+    private exchangeRates = inject(ExchangeRateService);
 
     bankAccount = signal<BankAccount | null>(null);
-    dailyLimit = computed(() => this.plans.dailyDepositLimitFor(this.bankAccount()?.plan));
+    dailyLimit = computed(() => dailyDepositLimitFor(this.bankAccount()?.plan));
     depositedToday = computed(() => {
         const a = this.bankAccount();
         return a?.dailyDepositDate === this.today() ? (a.dailyDepositedEur ?? 0) : 0;
@@ -42,32 +42,47 @@ export class BankAccountService {
         const account = result.rows.length > 0 ? (result.rows[0] as unknown as BankAccount) : null;
         this.bankAccount.set(account);
         return account;
-    };
+    }
+    
+    async createBankAccount(userId: string): Promise<BankAccount> {
+        const row = await this.appwrite.tablesDB.createRow({
+            databaseId: environment.appwriteDatabaseId,
+            tableId: environment.appwriteBankAccountsId,
+            rowId: ID.unique(),
+            data: {
+                userId,
+                plan: 'free',
+                eur: 0,
+            },
+            permissions: ownerPermissions(userId),
+        });
 
-    addCurrency(accountRowId: string, currency: SupportedCurrency) {
-        return this.setCurrencyAmount(accountRowId, currency, 0);
+        const account = row as unknown as BankAccount;
+        this.bankAccount.set(account);
+        return account;
     }
 
-    removeCurrency(accountRowId: string, currency: SupportedCurrency) {
-        if(currency === 'eur') {
-            throw new Error('Cannot remove the base EUR account.');
+    addCurrency(currency: SupportedCurrency) {
+        if (this.requireAccount()[currency] !== null) {
+            throw new Error(`${currency.toUpperCase()} account already exists`);
         }
-        
-        return this.setCurrencyAmount(accountRowId, currency, null);
+        return this.setCurrencyAmount(currency, 0);
     }
 
-    async deposit(accountRowId: string, currency: SupportedCurrency, amount: number) {
-        if (amount <= 0) throw new Error('Amount must be positive');
+    removeCurrency(currency: SupportedCurrency) {
+        if(currency === 'eur') throw new Error('Cannot remove the base EUR account.');
+        /* const balance = this.requireBalance(currency);
+        if (balance > 0) throw new Error(`Withdraw or transfer your ${currency.toUpperCase()} balance first`); */
+        return this.setCurrencyAmount(currency, null);
+    }
 
-        const account = this.bankAccount();
-        if (!account) throw new Error('No account loaded');
-
-        const currentAmount = account[currency];
-        if (currentAmount === null) throw new Error(`${currency.toUpperCase()} account has not been added yet`);
+    async deposit(currency: SupportedCurrency, amount: number) {
+        this.assertPositive(amount);
+        const currentAmount = this.requireBalance(currency);
 
         let amountEur: number;
         try {
-            amountEur = await firstValueFrom(this.cc.toEur(amount, currency));
+            amountEur = await firstValueFrom(this.exchangeRates.toEur(amount, currency));
         } catch {
             throw new Error('Could not fetch the exchange rate. Try again later.');
         }
@@ -79,93 +94,68 @@ export class BankAccountService {
             throw new Error(`Daily deposit limit reached. You can still deposit ${left.toFixed(2)} EUR today.`);
         }
 
-        await this.updateAccount(accountRowId, {
-            [currency]: currentAmount + amount,
-            dailyDepositedEur: Math.round((usedToday + amountEur) * 100) / 100,
+        await this.updateAccount({
+            [currency]: this.round2(currentAmount + amount),
+            dailyDepositedEur: this.round2(usedToday + amountEur),
             dailyDepositDate: this.today(),
         });
     }
 
-    async setCurrencyAmount(accountRowId: string, currency: SupportedCurrency, amount: number | null) {
-        await this.updateAccount(accountRowId, { [currency]: amount });
+    private async setCurrencyAmount(currency: SupportedCurrency, amount: number | null) {
+        await this.updateAccount({[currency]: amount });
     }
 
-    private async updateAccount(rowId: string, data: Partial<BankAccount>) {
+    private async updateAccount(data: Partial<BankAccount>) {
+        const account = this.requireAccount();
+
         await this.appwrite.tablesDB.updateRow({
             databaseId: environment.appwriteDatabaseId,
             tableId: environment.appwriteBankAccountsId,
-            rowId,
-            data
+            rowId: account.$id,
+            data,
         })
-
-        const current = this.bankAccount();
-        if (current) this.bankAccount.set({ ...current, ...data });
+        this.bankAccount.update(a => a && {... a, ...data});
     }
 
-    async withdraw(accountRowId: string, currency: SupportedCurrency, amount: number) {
-        if (amount <= 0) throw new Error('Amount must be positive');
+    async withdraw(currency: SupportedCurrency, amount: number) {
+        this.assertPositive(amount);
+        const currentAmount = this.requireBalance(currency);
 
-        const account = this.bankAccount();
-        if (!account) throw new Error('No account loaded');
-
-        const currentAmount = account[currency];
-        if (currentAmount === null) throw new Error(`${currency.toUpperCase()} account has not been added yet`);
         if (amount > currentAmount) throw new Error('Insufficient funds');
 
-        await this.setCurrencyAmount(accountRowId, currency, currentAmount - amount);
+        await this.setCurrencyAmount(currency, this.round2(currentAmount - amount));
     }
 
-    async transfer(rowId: string, from: SupportedCurrency, to: SupportedCurrency, amount: number) {
-        if (amount <= 0) throw new Error('Amount must be positive');
+    async transfer(from: SupportedCurrency, to: SupportedCurrency, amount: number) {
+        this.assertPositive(amount);
         if (from === to) throw new Error('Choose two different currencies');
 
-        const account = this.bankAccount();
-        if (!account) throw new Error('No account loaded');
-
-        const fromAmount = account[from];
-        const toAmount = account[to];
-        if (fromAmount === null) throw new Error(`${from.toUpperCase()} account has not been added yet`);
-        if (toAmount === null) throw new Error(`${to.toUpperCase()} account has not been added yet`);
+        const fromAmount = this.requireBalance(from);
+        const toAmount = this.requireBalance(to);
         if (amount > fromAmount) throw new Error('Insufficient funds');
         
         let converted: number;
         try {
-            converted = await firstValueFrom(this.cc.convert(amount, from, to));
+            converted = await firstValueFrom(this.exchangeRates.convert(amount, from, to));
         } catch {
             throw new Error('Could not fetch the exchange rate. Try again later.');
         }
 
-        await this.updateAccount(rowId, {
-            [from]: Math.round((fromAmount - amount) * 100 / 100),
-            [to]: Math.round((toAmount + converted) * 100 / 100)
+        await this.updateAccount({
+            [from]: this.round2(fromAmount - amount),
+            [to]: this.round2(toAmount + converted)
         });
 
         return converted;
     }
 
 
-    private async findUserIdByEmail(email: string): Promise<string> {
-        const result = await this.appwrite.tablesDB.listRows({
-            databaseId: environment.appwriteDatabaseId,
-            tableId: environment.appwriteProfilesTableId,
-            queries: [Query.equal('email', email.trim().toLowerCase())]
-        });
-
-        const profile = result.rows[0];
-        if (!profile) throw new Error('Recipient not found');
-
-        return profile['userId'] as string;
-    }
-
-    async send(accountRowId: string, toUserId: string, currency: SupportedCurrency, amount: number) {
-        if (amount <= 0) throw new Error('Amount must be positive');
-
-        const account = this.bankAccount();
-        if (!account) throw new Error('No account loaded');
+    async send(toUserId: string, currency: SupportedCurrency, amount: number) {
+        this.assertPositive(amount);
+        const account = this.requireAccount();
         if (toUserId === account.userId) throw new Error('Cannot send money to yourself');
 
-        const currentAmount = account[currency];
-        if (currentAmount === null) throw new Error(`${currency.toUpperCase()} account has not been added yet`);
+        const currentAmount = this.requireBalance(currency);
         if (amount > currentAmount) throw new Error('Insufficient funds');
 
         const res = await this.appwrite.tablesDB.listRows({
@@ -180,18 +170,39 @@ export class BankAccountService {
         const receiverAmount = receiver[currency] as number | null;
         if (receiverAmount === null) throw new Error(`Recipient has no ${currency.toUpperCase()} account`);
 
-        await this.withdraw(accountRowId, currency, amount);
+        await this.withdraw(currency, amount);
 
         try {
             await this.appwrite.tablesDB.updateRow({
                 databaseId: environment.appwriteDatabaseId,
                 tableId: environment.appwriteBankAccountsId,
                 rowId: receiver.$id,
-                data: { [currency]: Math.round((receiverAmount + amount) * 100) / 100 }
+                data: { [currency]: this.round2(receiverAmount + amount) }
             });
         } catch {
-            await this.setCurrencyAmount(accountRowId, currency, currentAmount);
+            const live = this.requireBalance(currency);
+            await this.setCurrencyAmount(currency, this.round2(live + amount));
             throw new Error('Transfer failed, you were refunded');
         }
+    }
+
+    private round2(value: number): number {
+        return Math.round(value * 100) / 100;
+    }
+
+    private requireAccount(): BankAccount {
+        const account = this.bankAccount();
+        if (!account) throw new Error('No account loaded');
+        return account;
+    }
+
+    private requireBalance(currency: SupportedCurrency): number {
+        const balance = this.requireAccount()[currency];
+        if (balance === null) throw new Error(`${currency.toUpperCase()} account has not been added yet`);
+        return balance;
+    }
+
+    private assertPositive(amount: number): void {
+        if (amount <= 0) throw new Error('Amount must be positive');
     }
 }

@@ -1,21 +1,23 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { NonNullableFormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '@core/services/auth/auth.service';
 import { Button } from '@shared/ui/button/button';
 import { InputField } from '../components/input-field/input-field';
 import { scrollToFirstInvalidField, getAppwriteError } from '@shared/utils/form.utils';
-import { NavigationService } from '@core/services/navigation.service';
+import { AuthRedirectService } from '@core/services/auth-redirect.service';
+import { AuthLayout } from '../components/auth-layout/auth-layout';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, Button, InputField],
+  imports: [ReactiveFormsModule, Button, InputField, AuthLayout],
   templateUrl: './login.html',
   styles: ``,
 })
 export class Login {
     private fb = inject(NonNullableFormBuilder);
     private auth = inject(AuthService);
-    private nav = inject(NavigationService);
+    private nav = inject(AuthRedirectService);
+    private formEl = viewChild.required<ElementRef<HTMLFormElement>>('formEl');
     protected readonly isSubmitting = signal(false);
     protected readonly errorMessage = signal<string | null>(null);
 
@@ -26,7 +28,7 @@ export class Login {
 
     async tryLogin(): Promise<void> {
         this.loginForm.updateValueAndValidity();
-        scrollToFirstInvalidField(this.loginForm);
+        scrollToFirstInvalidField(this.loginForm, this.formEl().nativeElement);
 
         if(this.loginForm.invalid) return;
 
@@ -35,9 +37,9 @@ export class Login {
         const { email, password } = this.loginForm.getRawValue();
         try {
             await this.auth.logIn(email, password);
-            await this.nav.redirectUser('user/overview');
+            await this.nav.redirectAfterLogin('user/overview');
         } catch(error: unknown) {
-            getAppwriteError(error);
+            this.errorMessage.set(getAppwriteError(error));
         } finally {
             this.isSubmitting.set(false);
         }

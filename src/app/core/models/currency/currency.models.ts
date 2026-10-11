@@ -8,4 +8,3 @@ export const currencyLocaleMap: Record<SupportedCurrency, string> = {
 };
 
 export const SUPPORTED_CURRENCIES = Object.keys(currencyLocaleMap) as SupportedCurrency[];
-export const CONVERTABLE_CURRENCIES = ['DKK', 'SEK', 'PLN'];

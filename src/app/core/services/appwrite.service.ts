@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Client, Account, TablesDB, Storage } from 'appwrite';
-import { environment } from '@/environments/environment.development';
+import { environment } from '@/environments/environment';
 
 @Injectable({
     providedIn: 'root'

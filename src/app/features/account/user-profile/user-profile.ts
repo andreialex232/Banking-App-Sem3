@@ -51,7 +51,7 @@ import { ProfileBadge } from '@shared/ui/profile-badge/profile-badge';
     </div>
     <!-- End of left side -->
     <!-- right side -->
-    <div class="shadow-custom-big mb-40 p-10 col-start-6 col-end-12">
+    <div class="shadow-custom mb-40 p-10 col-start-6 col-end-12">
         <router-outlet></router-outlet>
     </div>
     

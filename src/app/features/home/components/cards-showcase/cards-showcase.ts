@@ -20,7 +20,7 @@ import { RouterLink } from '@angular/router';
         
         <p class="text-base lg:text-lg text-text-muted font-medium">Pick the perfect card to gear up for your daily spending. Whether you are traveling, shopping online, or saving for the future, match your card to your goals.</p>
 
-        <ul class="flex flex-col gap-2 md:text-md xl:text-base font-medium">
+        <ul class="flex flex-col gap-2 xl:text-base font-medium">
             <li class="flex items-center gap-2">
                 <div class="flex h-6 w-6 items-center justify-center rounded-full bg-text-main">
                     <svg class="h-4 w-4 stroke-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
