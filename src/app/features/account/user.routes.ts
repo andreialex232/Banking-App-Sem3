@@ -14,6 +14,7 @@ export const USER_ROUTES: Routes = [
             },
             {
                 path: 'overview',
+                title: 'Overview - Your Bank',
                 loadComponent: () => import('./overview/overview').then(m => m.Overview),
                 children: [
                     {
@@ -30,6 +31,7 @@ export const USER_ROUTES: Routes = [
             },
             {
                 path: 'settings',
+                title: 'Settings - Your Bank',
                 loadComponent: () => import('./settings/settings').then(m => m.Settings)
             },
         ]
