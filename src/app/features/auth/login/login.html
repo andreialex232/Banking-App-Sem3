@@ -13,6 +13,7 @@
                     [control]="email"
                     colSpan="col-span-4"
                     label="Email Address"
+                    type="email"
                     id="email">
                     <ng-container errors>
                         @if (email.hasError('required')) {
@@ -46,7 +47,7 @@
 
         <div class="flex gap-4 items-center">
             <button appButton variant="primary" buttonType="submit" [loading]="isSubmitting()">Log in</button>
-            <p class="text-red-500">{{ errorMessage() }}</p>
+            <p role="alert" class="text-red-500">{{ errorMessage() }}</p>
         </div>
     </form>
 </app-auth-layout>
