@@ -11,12 +11,13 @@ import { AppSectionTitle } from '@shared/ui/app-section-title/app-section-title'
   templateUrl: `./overview.html`,
   host: {
     '(document:click)': 'onDocumentClick($event)',
-    '(document:keydown.escape)': 'closeMenu()'
+    '(document:keydown.escape)': 'closeMenu(true)'
   }
 })
 export class Overview {
     private bankAcc = inject(BankAccountService);
 
+    private addBtn = viewChild<ElementRef<HTMLButtonElement>>('addBtn');
     private menuRoot = viewChild<ElementRef<HTMLElement>>('menuRoot');
 
     account = this.bankAcc.bankAccount;
@@ -49,9 +50,11 @@ export class Overview {
         this.isMenuOpen.update(open => !open);
     }
 
-    closeMenu() {
+    closeMenu(returnFocus = false) {
+        const wasOpen = this.isMenuOpen();
         this.isMenuOpen.set(false);
         this.selectedCurrency.set(null);
+        if(wasOpen && returnFocus) this.addBtn()?.nativeElement.focus();
     }
 
     onDocumentClick(event: MouseEvent) {
@@ -75,7 +78,7 @@ export class Overview {
         this.isAdding.set(true);
         try {
             await this.bankAcc.addCurrency(currency);
-            this.closeMenu();
+            this.closeMenu(true);
         } catch(err) {
             console.error('Failed to add currency', err);
         } finally {
