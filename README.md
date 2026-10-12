@@ -18,6 +18,7 @@ Built with **Angular 21** (standalone components, signals, lazy-loaded routes), 
 
 ## Features
 
+| --- | --- |
 | **Auth** | Register (validated form, country-aware postal codes), log in, log out, session restore on reload |
 | **Accounts** | A EUR base account is created on sign-up. Add or remove DKK, SEK and PLN sub-accounts |
 | **Money** | Deposit, withdraw, convert between your own currencies, send money to another user by email |
@@ -26,6 +27,7 @@ Built with **Angular 21** (standalone components, signals, lazy-loaded routes), 
 
 ## Tech stack
 
+| --- | --- |
 | Framework | Angular 21: standalone components, signals, `inject()`, functional guards, new control flow |
 | Backend | Appwrite Cloud: Auth, TablesDB (database), Storage (avatars) |
 | Styling | Tailwind CSS 4 |
@@ -55,8 +57,8 @@ Path aliases (`@core`, `@shared`, `@`) keep imports short and make the layer bou
 
 ### Separation of concerns
 
+| --- | --- |
 | Concern | Where it lives |
-
 | UI | Components in `features/` and `shared/ui/` |
 | Application logic | Services in `core/services/` (for example `BankAccountService` owns deposits, withdrawals, transfers and limits) |
 | Data access | `AppwriteService` is the single place the SDK client is created. Services call `tablesDB` and `storage` through it |
@@ -68,7 +70,7 @@ Services hold state in signals (`bankAccount`, `profile`, `currentUser`). Compon
 ### Routing and guards
 
 | Route | Guard | Notes |
-
+| --- | --- | --- |
 | `/`, `/home` | none | Public landing page |
 | `/login`, `/register` | `guestGuard` | Logged-in users are redirected away |
 | `/user/**` | `authGuard` | Redirects to `/login?returnUrl=…`, lazy-loaded child routes |
@@ -81,7 +83,7 @@ Every row and file is created with owner-only permissions (`read`, `update`, `de
 ### CRUD
 
 | Operation | Example in the app |
-
+| --- | --- |
 | **Create** | Register (profile and bank account rows), add a currency account, upload an avatar |
 | **Read** | Load profile and balances, look up a recipient by email |
 | **Update** | Deposit, withdraw, convert, send, change avatar |
