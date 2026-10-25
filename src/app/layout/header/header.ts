@@ -19,8 +19,8 @@ import { Button } from '@shared/ui/button/button';
                 </a>
             </li>
             @for (item of primaryNav; track item.name) {
-                <li>
-                    <a [attr.href]="item.href || null" class="group hover:text-white px-4 py-2 hover:bg-[#222] gap-2 hover:rounded-md flex justify-center items-center flex-row-reverse transition-all hover:translate-y-[2px] active:translate-y-[3px]">{{item.name}}
+                <li class="">
+                    <a class="group hover:text-white px-4 py-2 hover:bg-[#222] gap-2 hover:rounded-md flex justify-center items-center flex-row-reverse transition-all hover:translate-y-[2px] active:translate-y-[3px]" [routerLink]="item.href">{{item.name}}
                         <img [src]="item.svgUrl" aria-hidden="true" alt="" width="24px" class="group-hover:brightness-0 group-hover:invert">
                     </a>
                 </li>
@@ -74,7 +74,7 @@ export class Header {
     protected readonly primaryNav:INavigation[] = [
         {
             name: "Accounts",
-            href: "",
+            href: "user/overview",
             svgUrl: "assets/svgs/account.svg"
         },
         {

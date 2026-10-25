@@ -9,5 +9,5 @@ export const guestGuard: CanActivateFn = async () => {
     const user = await auth.restoreSession();
     if (!user) return true;
 
-    return router.createUrlTree(['/']);
+    return router.createUrlTree(['/user/overview']);
 };
