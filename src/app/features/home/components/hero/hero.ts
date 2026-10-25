@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
         <div class="flex lg:text-base xl:text-lg flex-col gap-6">
         <p class="text-grey lg:hidden font-medium text-xl">Take full control of your finances with high-yield savings and 24/7 protection.</p>
         <p class="hidden lg:block font-medium text-xl">Simple, secure, and responsible banking designed around your life. Take full control of your finances with high-yield savings and 24/7 protection.</p>
-            <a class="block btn-base btn-primary" routerLink="/register">Join today</a>
+            <a class="block btn-base btn-primary btn-md" routerLink="/register">Join today</a>
         </div>
     </div>
 </header>

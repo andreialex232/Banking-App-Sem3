@@ -47,7 +47,7 @@ import { RouterLink } from '@angular/router';
             </li>
         </ul>
 
-        <a class="btn-base btn-primary" routerLink="/register">
+        <a class="btn-base btn-primary btn-sm" routerLink="/register">
             Compare Cards
         </a>
     </div>
