@@ -7,7 +7,7 @@ import { Component, Input } from '@angular/core';
     <div 
         class="flex justify-center items-center" 
         [class.flex-col]="variant === 'vertical'">
-        <img src="assets/svgs/bank-orange.svg" alt="Bank Logo">
+        <img src="assets/svgs/bank-orange.svg" alt="">
         <div 
             class="flex justify-center items-center flex-col" 
             [class.mt-2]="variant === 'vertical'" 

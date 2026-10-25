@@ -23,7 +23,7 @@ import { RouterLink } from '@angular/router';
         <ul class="flex flex-col gap-2 xl:text-base font-medium">
             <li class="flex items-center gap-2">
                 <div class="flex h-6 w-6 items-center justify-center rounded-full bg-text-main">
-                    <svg class="h-4 w-4 stroke-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+                    <svg aria-hidden="true" class="h-4 w-4 stroke-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                     </svg>
                 </div>
@@ -31,7 +31,7 @@ import { RouterLink } from '@angular/router';
             </li>
             <li class="flex items-center gap-2">
                 <div class="flex h-6 w-6 items-center justify-center rounded-full bg-text-main">
-                    <svg class="h-4 w-4 stroke-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+                    <svg aria-hidden="true" class="h-4 w-4 stroke-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                     </svg>
                 </div>
@@ -39,7 +39,7 @@ import { RouterLink } from '@angular/router';
             </li>
             <li class="flex items-center gap-2">
                 <div class="flex h-6 w-6 items-center justify-center rounded-full bg-text-main">
-                    <svg class="h-4 w-4 stroke-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+                    <svg aria-hidden="true" class="h-4 w-4 stroke-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                     </svg>
                 </div>

@@ -148,7 +148,7 @@
             <button appButton variant="primary" buttonType="submit" [loading]="isSubmitting()">
                 Create account
             </button>
-            <p class="text-sm text-danger">{{ otherError() }}</p>
+            <p role="alert" class="text-sm text-danger">{{ otherError() }}</p>
         </div>
     </form>
 </app-auth-layout>
