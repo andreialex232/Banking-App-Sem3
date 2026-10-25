@@ -13,7 +13,7 @@ import { Component, Input } from '@angular/core';
             [class.mt-2]="variant === 'vertical'" 
             [class.ml-2]="variant === 'horizontal'">
         <span class="text-grey {{ yourSize }} uppercase -mb-2">your</span>
-        <span class="uppercase text-orange {{ bankSize }}">bank</span>
+        <span class="uppercase text-primary {{ bankSize }}">bank</span>
         </div>
     </div>
   `,
