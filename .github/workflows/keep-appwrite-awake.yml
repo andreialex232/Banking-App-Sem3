@@ -2,7 +2,7 @@ name: Keep Appwrite awake
 
 on:
   schedule:
-    - cron: '17 6 */3 * *' # 06:17 UTC every 3 days
+    - cron: '17 6 */5 * *'
   workflow_dispatch:
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
       APPWRITE_ENDPOINT: https://fra.cloud.appwrite.io/v1
       APPWRITE_PROJECT: 6aa2f64e001cd510a054
       # A hostname registered under Platforms in your Appwrite project:
-      ORIGIN: https://YOUR-REGISTERED-HOST
+      ORIGIN: http://localhost:4200/
     steps:
       - name: Guest request to Appwrite
         run: |
