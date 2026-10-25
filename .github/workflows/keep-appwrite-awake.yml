@@ -12,7 +12,7 @@ jobs:
       APPWRITE_ENDPOINT: https://fra.cloud.appwrite.io/v1
       APPWRITE_PROJECT: 6aa2f64e001cd510a054
       # A hostname registered under Platforms in your Appwrite project:
-      ORIGIN: http://localhost:4200/
+      ORIGIN: https://banking-app-sem3.appwrite.network
     steps:
       - name: Guest request to Appwrite
         run: |
