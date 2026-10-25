@@ -1,0 +1,99 @@
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { SupportedCurrency, SUPPORTED_CURRENCIES } from '@core/models/currency/currency.models';
+import { differentCurrencies } from './validators/different-currencies.validator';
+import { Button } from '@shared/ui/button/button';
+import { AmountField } from '@shared/forms/amount-field/amount-field';
+import { ExchangeRateService } from '@core/services/bank-account/exchange-rate.service';
+import { Rate } from '@core/models/bank-account/exchange-rate.models';
+import { BankAccountService } from '@core/services/bank-account/bank-account.service';
+import { catchError, of } from 'rxjs';
+import { formatMoney } from '@shared/utils/format-money';
+import { AppSectionTitle } from '@shared/ui/app-section-title/app-section-title';
+
+@Component({
+  selector: 'app-currency-converter',
+  imports: [ReactiveFormsModule, Button, AmountField, AppSectionTitle],
+  templateUrl: `./currency-converter.html`,
+  styles: ``
+})
+export class CurrencyConverter {
+    private destroyRef = inject(DestroyRef);
+    private exchangeRates = inject(ExchangeRateService);
+    private bankAccountService = inject(BankAccountService);
+
+    readonly currencies: SupportedCurrency[] = SUPPORTED_CURRENCIES;
+    rates = toSignal(
+        this.exchangeRates.getRateList()
+            .pipe(catchError(err => {
+                console.error('Failed to load rates', err);
+                return of([] as Rate[]);
+            })),
+            {initialValue: [] as Rate[]}
+    )
+
+    form = new FormGroup({
+        amount: new FormControl<number | null>(null, {
+                validators: [
+                    Validators.required,
+                    Validators.min(0.01),
+                    Validators.max(1_000_000)
+                ],
+                updateOn: 'blur'
+            }
+        ),
+        from: new FormControl<SupportedCurrency>('eur', {nonNullable: true}),
+        to: new FormControl<SupportedCurrency>('pln', {nonNullable: true})
+    },{validators: differentCurrencies})
+
+    loading = signal(false);
+    result = signal<string | null>(null);
+    apiError = signal<string | null>(null);
+
+    constructor() {
+        this.form.valueChanges
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => {
+                this.result.set(null);
+                this.apiError.set(null);
+            });
+    }
+
+    get amount() {return this.form.controls.amount; }
+    get from() {return this.form.controls.from; }
+    get to() {return this.form.controls.to; }
+
+    swap() {
+        const { from, to } = this.form.getRawValue();
+        this.form.patchValue({ from: to, to: from });
+    };
+
+    async convert() {
+        if(this.form.invalid) {
+            this.form.markAllAsTouched()
+            return;
+        }
+
+        const { amount, from, to } = this.form.getRawValue();
+        this.resetConversionFeedback();
+        
+        try {
+            const account = this.bankAccountService.bankAccount();
+            if (!account) throw new Error('No account loaded');
+            const converted = await this.bankAccountService.transfer(from, to, amount!);
+            this.result.set(`${formatMoney(amount!, from)} = ${formatMoney(converted, to)}`);           
+        } catch(err) {
+            this.apiError.set(err instanceof Error ? err.message : 'Something went wrong. Try later.');
+        } finally {
+            this.loading.set(false);
+        }
+    }
+
+    private resetConversionFeedback() {
+        this.loading.set(true);
+        this.result.set(null);
+        this.apiError.set(null);
+    }
+
+}

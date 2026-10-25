@@ -1,0 +1,23 @@
+name: Keep Appwrite awake
+
+on:
+  schedule:
+    - cron: '17 6 */5 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    env:
+      APPWRITE_ENDPOINT: https://fra.cloud.appwrite.io/v1
+      APPWRITE_PROJECT: 6aa2f64e001cd510a054
+      # A hostname registered under Platforms in your Appwrite project:
+      ORIGIN: http://localhost:4200/
+    steps:
+      - name: Guest request to Appwrite
+        run: |
+          curl --fail --silent --show-error \
+            -H "X-Appwrite-Project: $APPWRITE_PROJECT" \
+            -H "Origin: $ORIGIN" \
+            --output /dev/null --write-out "Appwrite: HTTP %{http_code}\n" \
+            "$APPWRITE_ENDPOINT/locale"

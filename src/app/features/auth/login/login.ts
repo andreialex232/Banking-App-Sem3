@@ -1,0 +1,56 @@
+import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { NonNullableFormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AuthService } from '@core/services/auth/auth.service';
+import { Button } from '@shared/ui/button/button';
+import { InputField } from '../components/input-field/input-field';
+import { scrollToFirstInvalidField, getAppwriteError } from '@shared/utils/form.utils';
+import { AuthRedirectService } from '@core/services/auth-redirect.service';
+import { AuthLayout } from '../components/auth-layout/auth-layout';
+
+@Component({
+  selector: 'app-login',
+  imports: [ReactiveFormsModule, Button, InputField, AuthLayout],
+  templateUrl: './login.html',
+  styles: ``,
+})
+export class Login {
+    private fb = inject(NonNullableFormBuilder);
+    private auth = inject(AuthService);
+    private nav = inject(AuthRedirectService);
+    private formEl = viewChild.required<ElementRef<HTMLFormElement>>('formEl');
+    protected readonly isSubmitting = signal(false);
+    protected readonly errorMessage = signal<string | null>(null);
+
+    loginForm = this.fb.group({
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required]]
+    });
+
+    async tryLogin(): Promise<void> {
+        this.loginForm.updateValueAndValidity();
+        scrollToFirstInvalidField(this.loginForm, this.formEl().nativeElement);
+
+        if(this.loginForm.invalid) return;
+
+        this.startSubmission();
+
+        const { email, password } = this.loginForm.getRawValue();
+        try {
+            await this.auth.logIn(email, password);
+            await this.nav.redirectAfterLogin('user/overview');
+        } catch(error: unknown) {
+            this.errorMessage.set(getAppwriteError(error));
+        } finally {
+            this.isSubmitting.set(false);
+        }
+    }
+
+    private startSubmission() {
+        this.isSubmitting.set(true);
+        this.errorMessage.set(null);
+    }
+
+
+
+
+}

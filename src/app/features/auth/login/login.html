@@ -1,0 +1,53 @@
+<app-auth-layout
+    highlight="Welcome back"
+    heading="friend"
+    subtitle="Log in to resume smart-saving"
+    footerText="Don't have an account?"
+    footerLink="/register">
+
+    <form #formEl [formGroup]="loginForm" (ngSubmit)="tryLogin()">
+        <div class="mt-10 mb-0 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+            @let email = this.loginForm.controls.email;
+                <app-input-field
+                    [autocomplete]="'email'"
+                    [control]="email"
+                    colSpan="col-span-4"
+                    label="Email Address"
+                    type="email"
+                    id="email">
+                    <ng-container errors>
+                        @if (email.hasError('required')) {
+                            Email address is required
+                        }
+                        @if (email.hasError('email')) {
+                            Enter a valid email address
+                        }
+                    </ng-container>
+                </app-input-field>
+                
+                @let password = this.loginForm.controls.password;
+                <app-input-field
+                    [autocomplete]="'current-passwords'"
+                    label="Password"
+                    colSpan="col-span-4"
+                    id="password"
+                    type="password"
+                    [control]="password">
+                <ng-container errors>
+                    @if(password.hasError('required')) {
+                        Password is required
+                    }
+                </ng-container>
+            </app-input-field>
+        </div>
+
+        <div class="col-span-6 mb-6">
+            <a class="text-xs hover:underline" href="">Forgot password?</a>
+        </div>
+
+        <div class="flex gap-4 items-center">
+            <button appButton variant="primary" buttonType="submit" [loading]="isSubmitting()">Log in</button>
+            <p role="alert" class="text-red-500">{{ errorMessage() }}</p>
+        </div>
+    </form>
+</app-auth-layout>
