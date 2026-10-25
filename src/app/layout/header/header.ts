@@ -30,12 +30,12 @@ import { Button } from '@shared/ui/button/button';
     <ul class="flex gap-4 justify-self-end col-start-13">
         @if(!currentUser()) {
             <li>
-                <a routerLink="/register" class="btn-base btn-primary">
+                <a routerLink="/register" class="btn-sm btn-base btn-primary">
                     Create account
                 </a>
             </li>
             <li>
-                <a routerLink="/login" class="btn-base btn-primary">
+                <a routerLink="/login" class="btn-sm btn-base btn-primary">
                     Log in
                 </a>
             </li>
@@ -43,6 +43,7 @@ import { Button } from '@shared/ui/button/button';
             <button appButton 
                 (click)="logOut()"
                 [loading]="isLogouting()"
+                size="btn-sm"
                 buttonType="button">
                 Log out
             </button>
